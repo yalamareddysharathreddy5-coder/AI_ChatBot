@@ -59,13 +59,24 @@ const THEME_COPY = {
   night: 'Good night',
 }
 
+const rand = (seed) => {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
+
 function SkyScene({ theme }) {
-  const stars = Array.from({ length: 36 }, (_, i) => ({
-    left: `${(i * 37) % 100}%`,
-    top: `${((i * 53) % 46) + 2}%`,
-    delay: `${((i * 0.13) % 1) * 2.4}s`,
-    size: i % 5 === 0 ? 4 : 2.5,
-  }))
+  const stars = Array.from({ length: 48 }, (_, i) => {
+    const size = rand(i * 11.9)
+    return {
+      left: `${(rand(i * 7.31) * 100).toFixed(1)}%`,
+      top: `${(rand(i * 3.97) * 46 + 2).toFixed(1)}%`,
+      size: size < 0.18 ? 4.5 : size < 0.5 ? 3.2 : 2.3,
+      delay: `${(rand(i * 13.1) * 3.4).toFixed(2)}s`,
+      dur: `${(1.8 + rand(i * 17.3) * 3.2).toFixed(2)}s`,
+      min: 0.12,
+      max: rand(i * 19.7) < 0.25 ? 0.85 : 1,
+    }
+  })
 
   return (
     <div className={`welcome-sky ${theme}`}>
@@ -83,12 +94,17 @@ function SkyScene({ theme }) {
                   top: s.top,
                   width: `${s.size}px`,
                   height: `${s.size}px`,
+                  '--twinkle-dur': s.dur,
+                  '--twinkle-min': s.min,
+                  '--twinkle-max': s.max,
                   animationDelay: s.delay,
                 }}
               />
             ))}
           </div>
           <div className="moon" />
+          <div className="shooting-star shooting-star-one" />
+          <div className="shooting-star shooting-star-two" />
         </>
       ) : (
         <div className="sky-sun">
@@ -98,6 +114,7 @@ function SkyScene({ theme }) {
       )}
       <div className="cloud cloud-one" />
       <div className="cloud cloud-two" />
+      <div className="cloud cloud-three" />
       <div className="welcome-copy">
         <span className="welcome-logo">{theme === 'night' ? '\u263E' : '\u2600'}</span>
         <p className="welcome-title">Start a conversation with SunGPT</p>
