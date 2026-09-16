@@ -1217,14 +1217,14 @@
 }
 
 .planet-saturn {
-  top: 14%;
+  top: 15%;
   left: 6%;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   background: radial-gradient(circle at 32% 30%, #ffe3b0, #d9a460 55%, #8a5a2b 100%);
   box-shadow: 0 0 18px rgba(255, 214, 150, 0.35);
-  animation: planetDriftNear 100s linear infinite;
-  animation-delay: -35s;
+  animation: planetDriftA 95s ease-in-out infinite;
+  animation-delay: -15s;
 }
 
 .planet-saturn::after {
@@ -1232,9 +1232,9 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 64px;
-  height: 22px;
-  margin: -11px 0 0 -32px;
+  width: 66px;
+  height: 24px;
+  margin: -12px 0 0 -33px;
   border: 3px solid rgba(233, 199, 142, 0.55);
   border-radius: 50%;
   transform: rotate(-18deg);
@@ -1242,60 +1242,101 @@
 
 .planet-mars {
   top: 30%;
-  left: 12%;
-  width: 22px;
-  height: 22px;
+  left: 44%;
+  width: 24px;
+  height: 24px;
   background: radial-gradient(circle at 34% 32%, #f8a27f, #d9644f 55%, #7c2f24 100%);
   box-shadow: 0 0 14px rgba(255, 130, 95, 0.35);
-  animation: planetDriftMid 140s linear infinite;
-  animation-delay: -75s;
+  animation: planetDriftB 130s ease-in-out infinite;
+  animation-delay: -45s;
 }
 
 .planet-blue {
   top: 60%;
-  left: 18%;
-  width: 26px;
-  height: 26px;
+  left: 24%;
+  width: 30px;
+  height: 30px;
   z-index: 0;
   background: radial-gradient(circle at 32% 30%, #c7e6ff, #6aa7dd 55%, #2c5a8c 100%);
   box-shadow: 0 0 16px rgba(140, 200, 255, 0.3);
-  animation: planetDriftFar 170s linear infinite;
-  animation-delay: -120s;
+  animation: planetDriftC 165s ease-in-out infinite;
+  animation-delay: -70s;
 }
 
-@keyframes planetDriftNear {
+.planet-pale {
+  top: 44%;
+  left: 70%;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 32%, #ffffff, #e8e2d0 55%, #b9ac92 100%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+  animation: planetDriftD 120s ease-in-out infinite;
+  animation-delay: -30s;
+}
+
+@keyframes planetDriftA {
   0% {
-    transform: translateX(-20vw) translateY(0);
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(10vw) translateY(12px);
   }
   50% {
-    transform: translateX(50vw) translateY(18px);
+    transform: translateX(20vw) translateY(0);
+  }
+  75% {
+    transform: translateX(10vw) translateY(-10px);
   }
   100% {
-    transform: translateX(120vw) translateY(0);
+    transform: translateX(0) translateY(0);
   }
 }
 
-@keyframes planetDriftMid {
+@keyframes planetDriftB {
   0% {
-    transform: translateX(-24vw) translateY(0);
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(6vw) translateY(9px);
   }
   50% {
-    transform: translateX(45vw) translateY(-12px);
+    transform: translateX(12vw) translateY(0);
+  }
+  75% {
+    transform: translateX(6vw) translateY(-7px);
   }
   100% {
-    transform: translateX(120vw) translateY(0);
+    transform: translateX(0) translateY(0);
   }
 }
 
-@keyframes planetDriftFar {
+@keyframes planetDriftC {
   0% {
-    transform: translateX(-28vw) translateY(0);
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(9vw) translateY(14px);
   }
   50% {
-    transform: translateX(42vw) translateY(8px);
+    transform: translateX(18vw) translateY(0);
+  }
+  75% {
+    transform: translateX(9vw) translateY(-6px);
   }
   100% {
-    transform: translateX(120vw) translateY(0);
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes planetDriftD {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(7vw) translateY(8px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
   }
 }
 

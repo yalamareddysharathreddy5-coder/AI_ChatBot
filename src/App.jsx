@@ -105,6 +105,7 @@ function SkyScene({ theme }) {
           <div className="planet planet-saturn" />
           <div className="planet planet-mars" />
           <div className="planet planet-blue" />
+          <div className="planet planet-pale" />
           <div className="moon" />
           <div className="shooting-star shooting-star-one" />
           <div className="shooting-star shooting-star-two" />
