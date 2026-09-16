@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import './App.css'
 import Markdown from './Markdown.jsx'
 
@@ -133,6 +133,49 @@ function SkyScene({ theme }) {
         <span className="welcome-logo">{theme === 'night' ? '\u263E' : '\u2600'}</span>
         <p className="welcome-title">Start a conversation with SunGPT</p>
         <p className="welcome-sub">{THEME_COPY[theme]}</p>
+      </div>
+    </div>
+  )
+}
+
+function Clock({ theme }) {
+  const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  const hours24 = now.getHours()
+  const hours = hours24 % 12 || 12
+  const minutes = now.getMinutes()
+  const seconds = now.getSeconds()
+  const ampm = hours24 >= 12 ? 'PM' : 'AM'
+  const pad = (n) => String(n).padStart(2, '0')
+  const groups = [pad(hours), pad(minutes), pad(seconds)]
+  const dateStr = now.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+
+  return (
+    <div className={`clock clock-${theme}`}>
+      <div className="clock-time">
+        {groups.map((group, gi) => (
+          <Fragment key={gi}>
+            {gi > 0 && <span className="clock-sep">:</span>}
+            {[...group].map((digit, di) => (
+              <span key={`${di}-${digit}`} className="clock-digit">
+                {digit}
+              </span>
+            ))}
+          </Fragment>
+        ))}
+        <span className="clock-ampm">{ampm}</span>
+      </div>
+      <div key={dateStr} className="clock-date">
+        {dateStr}
       </div>
     </div>
   )
@@ -502,6 +545,7 @@ function App() {
 
       <main className="chat-area">
         <div className="chat-window">
+          <Clock theme={timeOfDay} />
           <div className="messages">
             {messages.length === 0 ? (
               <SkyScene theme={timeOfDay} />

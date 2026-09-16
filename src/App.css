@@ -416,6 +416,7 @@
   width: 100%;
   max-width: 800px;
   height: 100%;
+  position: relative;
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.06);
@@ -425,6 +426,108 @@
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+}
+
+/* ── Live Clock ── */
+.clock {
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  padding: 0.45rem 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-time {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+}
+
+.clock-digit {
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+  animation: digitFlip 0.35s ease;
+}
+
+.clock-sep {
+  opacity: 0.55;
+}
+
+.clock-ampm {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 0.35rem;
+}
+
+.clock-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  animation: dateFade 0.8s ease;
+}
+
+@keyframes digitFlip {
+  from {
+    opacity: 0;
+    transform: translateY(45%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dateFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.clock-morning {
+  border-color: rgba(255, 180, 120, 0.4);
+  background: rgba(255, 150, 90, 0.12);
+}
+
+.clock-morning .clock-time {
+  color: #ffd9b0;
+}
+
+.clock-afternoon {
+  border-color: rgba(120, 190, 255, 0.4);
+  background: rgba(90, 170, 255, 0.1);
+}
+
+.clock-evening {
+  border-color: rgba(230, 140, 180, 0.4);
+  background: rgba(200, 110, 160, 0.12);
+}
+
+.clock-night {
+  border-color: rgba(160, 170, 240, 0.35);
+  background: rgba(40, 50, 110, 0.25);
+}
+
+.clock-night .clock-time {
+  color: #dce1ff;
 }
 
 .messages {
@@ -1007,6 +1110,10 @@
   .ray {
     animation: none;
     opacity: 0.7;
+  }
+  .clock-digit,
+  .clock-date {
+    animation: none;
   }
 }
 
