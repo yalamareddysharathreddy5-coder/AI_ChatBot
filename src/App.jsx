@@ -3,6 +3,8 @@ import './App.css'
 
 const CHATS_KEY = 'sungpt-chats'
 const PROJECTS_KEY = 'sungpt-projects'
+const REPLY_DELAY = 1500
+const RAY_COUNT = 8
 
 function getMockResponse() {
   return 'This is a canned SunGPT response. Ask me anything and I will act like a real assistant soon!'
@@ -26,6 +28,24 @@ function loadFromStorage(key) {
   }
 }
 
+function SunLoader() {
+  return (
+    <div className="sun-loader" role="status" aria-label="SunGPT is thinking">
+      <div className="sun-halo" />
+      <div className="sun-core" />
+      <div className="sun-rays">
+        {Array.from({ length: RAY_COUNT }, (_, i) => (
+          <span
+            key={i}
+            className="ray"
+            style={{ '--i': i, '--angle': `${i * (360 / RAY_COUNT)}deg` }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarView, setSidebarView] = useState('chats')
@@ -37,12 +57,35 @@ function App() {
   const [activeChatId, setActiveChatId] = useState(null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
+  const [isThinking, setIsThinking] = useState(false)
   const idRef = useRef(0)
+  const messagesRef = useRef([])
   const messagesEndRef = useRef(null)
+  const replyTimerRef = useRef(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, isThinking])
+
+  useEffect(
+    () => () => {
+      if (replyTimerRef.current) clearTimeout(replyTimerRef.current)
+    },
+    [],
+  )
+
+  const updateMessages = (msgs) => {
+    messagesRef.current = msgs
+    setMessages(msgs)
+  }
+
+  const clearPendingReply = () => {
+    if (replyTimerRef.current) {
+      clearTimeout(replyTimerRef.current)
+      replyTimerRef.current = null
+    }
+    setIsThinking(false)
+  }
 
   const persistChat = (msgs, chatId) => {
     if (msgs.length === 0) return chatId
@@ -71,20 +114,32 @@ function App() {
     const text = input.trim()
     if (!text) return
 
-    const userMsg = { id: ++idRef.current, role: 'user', content: text }
-    const assistantMsg = { id: ++idRef.current, role: 'assistant', content: getMockResponse() }
-    const newMessages = [...messages, userMsg, assistantMsg]
+    clearPendingReply()
 
-    setMessages(newMessages)
+    const userMsg = { id: ++idRef.current, role: 'user', content: text }
+    const newMessages = [...messagesRef.current, userMsg]
+
+    updateMessages(newMessages)
     setInput('')
 
-    const newId = persistChat(newMessages, activeChatId)
-    if (newId !== activeChatId) setActiveChatId(newId)
+    const chatId = persistChat(newMessages, activeChatId)
+    if (chatId !== activeChatId) setActiveChatId(chatId)
+
+    setIsThinking(true)
+    replyTimerRef.current = setTimeout(() => {
+      const assistantMsg = { id: ++idRef.current, role: 'assistant', content: getMockResponse() }
+      const updated = [...messagesRef.current, assistantMsg]
+      updateMessages(updated)
+      persistChat(updated, chatId)
+      setIsThinking(false)
+      replyTimerRef.current = null
+    }, REPLY_DELAY)
   }
 
   const handleNewChat = () => {
-    if (messages.length > 0) persistChat(messages, activeChatId)
-    setMessages([])
+    clearPendingReply()
+    if (messagesRef.current.length > 0) persistChat(messagesRef.current, activeChatId)
+    updateMessages([])
     setInput('')
     setActiveChatId(null)
     idRef.current = 0
@@ -92,12 +147,13 @@ function App() {
   }
 
   const handleLoadChat = (chatId) => {
-    if (messages.length > 0 && chatId !== activeChatId) {
-      persistChat(messages, activeChatId)
+    clearPendingReply()
+    if (messagesRef.current.length > 0 && chatId !== activeChatId) {
+      persistChat(messagesRef.current, activeChatId)
     }
     const chat = chats.find((c) => c.id === chatId)
     if (chat) {
-      setMessages(chat.messages)
+      updateMessages(chat.messages)
       setActiveChatId(chatId)
       idRef.current = Math.max(0, ...chat.messages.map((m) => m.id))
     }
@@ -106,8 +162,9 @@ function App() {
 
   const handleClearHistory = () => {
     if (!window.confirm('Delete all saved chats? This cannot be undone.')) return
+    clearPendingReply()
     setChats([])
-    setMessages([])
+    updateMessages([])
     setInput('')
     setActiveChatId(null)
     idRef.current = 0
@@ -363,6 +420,12 @@ function App() {
                   <div className="bubble">{message.content}</div>
                 </div>
               ))
+            )}
+            {isThinking && (
+              <div className="message assistant">
+                <span className="message-label">SunGPT</span>
+                <SunLoader />
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>

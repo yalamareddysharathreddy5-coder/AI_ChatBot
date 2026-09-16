@@ -501,6 +501,112 @@
   font-size: 1rem;
 }
 
+/* ── Sun Thinking Indicator ── */
+.sun-loader {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+
+.sun-halo {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 175, 25, 0.4), transparent 68%);
+  animation: sunHaloPulse 1.6s ease-in-out infinite;
+}
+
+.sun-core {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff3c4, #f5af19 55%, #f12711);
+  box-shadow: 0 0 14px rgba(245, 175, 25, 0.85), 0 0 34px rgba(245, 175, 25, 0.4);
+  animation: sunCorePulse 1.6s ease-in-out infinite;
+}
+
+.sun-rays {
+  position: absolute;
+  inset: 0;
+  animation: sunRaysSpin 14s linear infinite;
+}
+
+.ray {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 14px;
+  margin: -7px 0 0 -2px;
+  border-radius: 3px;
+  background: linear-gradient(to top, rgba(245, 175, 25, 0), rgba(255, 214, 102, 0.95));
+  transform: rotate(var(--angle)) translateY(-24px);
+  animation: rayTwinkle 1.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.14s);
+}
+
+@keyframes sunCorePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 14px rgba(245, 175, 25, 0.85), 0 0 34px rgba(245, 175, 25, 0.4);
+  }
+  50% {
+    transform: scale(1.18);
+    box-shadow: 0 0 22px rgba(245, 175, 25, 1), 0 0 52px rgba(245, 175, 25, 0.55);
+  }
+}
+
+@keyframes sunHaloPulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes sunRaysSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rayTwinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    filter: brightness(0.7);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sun-core,
+  .sun-halo {
+    animation: none;
+  }
+  .sun-rays {
+    animation-duration: 60s;
+  }
+  .ray {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 /* ── Input Bar ── */
 .input-bar {
   display: flex;
