@@ -501,6 +501,259 @@
   font-size: 1rem;
 }
 
+/* ── Welcome Sky Scene ── */
+.welcome-sky {
+  position: relative;
+  flex: 1;
+  margin: -2rem;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.sky-gradient {
+  position: absolute;
+  inset: 0;
+  transition: background 1.2s ease;
+}
+
+.welcome-sky.morning .sky-gradient {
+  background: linear-gradient(180deg, #ffd9a3 0%, #ffb87a 55%, #ff9e80 100%);
+}
+
+.welcome-sky.afternoon .sky-gradient {
+  background: linear-gradient(180deg, #4aa8ff 0%, #6ec6ff 45%, #bfe8ff 100%);
+}
+
+.welcome-sky.evening .sky-gradient {
+  background: linear-gradient(180deg, #6b4a8f 0%, #d96a7a 55%, #ff9a5a 100%);
+}
+
+.welcome-sky.night .sky-gradient {
+  background: linear-gradient(180deg, #0b1026 0%, #1a1f3d 55%, #2b3a67 100%);
+}
+
+.horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  background: linear-gradient(to top, rgba(8, 10, 20, 0.4), rgba(8, 10, 20, 0));
+}
+
+/* Sun scene */
+.sky-sun {
+  position: absolute;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  margin-left: -60px;
+  display: grid;
+  place-items: center;
+}
+
+.welcome-sky.morning .sky-sun {
+  top: 30%;
+  animation: sunriseMove 5s ease-out both;
+}
+
+.welcome-sky.afternoon .sky-sun {
+  top: 17%;
+}
+
+.welcome-sky.evening .sky-sun {
+  top: 46%;
+  animation: sunsetSettle 6s ease-in-out both;
+}
+
+.sun-rays {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 224, 130, 0.5) 0deg 7deg,
+    transparent 7deg 20deg
+  );
+  -webkit-mask: radial-gradient(circle, rgba(0, 0, 0, 0.65) 0 20%, rgba(0, 0, 0, 0) 46%);
+  mask: radial-gradient(circle, rgba(0, 0, 0, 0.65) 0 20%, rgba(0, 0, 0, 0) 46%);
+  animation: sunRaysSpin 26s linear infinite;
+}
+
+.sun {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fff9d6, #ffe066 35%, #f5af19 62%, #ff8c1a 100%);
+  box-shadow: 0 0 36px rgba(245, 175, 25, 0.65), 0 0 90px rgba(255, 200, 80, 0.35);
+}
+
+.welcome-sky.evening .sun {
+  background: radial-gradient(circle at 38% 35%, #ffedca, #ffb36b 40%, #e8694a 75%, #b04a5e 100%);
+  box-shadow: 0 0 36px rgba(232, 105, 74, 0.6), 0 0 90px rgba(255, 154, 90, 0.35);
+}
+
+@keyframes sunriseMove {
+  from {
+    transform: translateY(170px);
+    opacity: 0.15;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes sunsetSettle {
+  0% {
+    transform: translateY(0);
+    opacity: 0.2;
+  }
+  60% {
+    transform: translateY(-26px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(8px);
+    opacity: 0.9;
+  }
+}
+
+/* Night scene */
+.moon {
+  position: absolute;
+  top: 20%;
+  left: 68%;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(150, 160, 190, 0.4) 0 3px, transparent 4px),
+    radial-gradient(circle at 62% 66%, rgba(150, 160, 190, 0.34) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 28%, rgba(150, 160, 190, 0.3) 0 3px, transparent 4px),
+    radial-gradient(circle at 35% 35%, #f6f7fb, #dfe3ef 55%, #b9c2de);
+  box-shadow: 0 0 28px rgba(220, 225, 255, 0.55), 0 0 80px rgba(220, 225, 255, 0.25);
+  animation: moonDrift 9s ease-in-out infinite alternate;
+}
+
+@keyframes moonDrift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  animation: starTwinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* Clouds */
+.cloud {
+  position: absolute;
+  width: 130px;
+  height: 26px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.22);
+  filter: blur(2px);
+  box-shadow: 24px 9px 0 -6px rgba(255, 255, 255, 0.2), -20px 7px 0 -8px rgba(255, 255, 255, 0.18);
+  opacity: 0.7;
+}
+
+.cloud-one {
+  top: 18%;
+  left: -10%;
+  animation: cloudDrift 45s linear infinite;
+}
+
+.cloud-two {
+  top: 62%;
+  left: -10%;
+  width: 100px;
+  animation: cloudDrift 60s linear infinite;
+  animation-delay: -25s;
+}
+
+@keyframes cloudDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(100vw - 20%));
+  }
+}
+
+/* Welcome copy */
+.welcome-copy {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 1.7rem 2.2rem;
+  background: rgba(10, 12, 30, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.welcome-logo {
+  display: block;
+  font-size: 2.4rem;
+  line-height: 1;
+  margin-bottom: 0.7rem;
+  color: #ffe066;
+  text-shadow: 0 0 18px rgba(245, 175, 25, 0.8);
+  animation: logoGlow 3s ease-in-out infinite;
+}
+
+.welcome-sky.night .welcome-logo {
+  color: #dfe3ef;
+  text-shadow: 0 0 18px rgba(220, 225, 255, 0.8);
+}
+
+@keyframes logoGlow {
+  0%,
+  100% {
+    text-shadow: 0 0 14px rgba(245, 175, 25, 0.6);
+  }
+  50% {
+    text-shadow: 0 0 26px rgba(245, 175, 25, 1);
+  }
+}
+
+.welcome-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.welcome-sub {
+  margin-top: 0.35rem;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
 /* ── Sun Thinking Indicator ── */
 .sun-loader {
   position: relative;

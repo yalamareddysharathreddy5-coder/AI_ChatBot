@@ -20,6 +20,36 @@ body {
   color: #e0e0e0;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  pointer-events: none;
+}
+
+body[data-theme='morning']::before {
+  background: linear-gradient(135deg, rgba(255, 145, 77, 0.55), rgba(140, 60, 110, 0.35));
+  opacity: 1;
+}
+
+body[data-theme='afternoon']::before {
+  background: linear-gradient(135deg, rgba(64, 154, 255, 0.5), rgba(46, 120, 235, 0.25));
+  opacity: 1;
+}
+
+body[data-theme='evening']::before {
+  background: linear-gradient(135deg, rgba(190, 92, 160, 0.5), rgba(255, 130, 90, 0.35));
+  opacity: 1;
+}
+
+body[data-theme='night']::before {
+  background: linear-gradient(135deg, rgba(20, 26, 66, 0.65), rgba(66, 40, 110, 0.4));
+  opacity: 1;
+}
+
 @keyframes gradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }

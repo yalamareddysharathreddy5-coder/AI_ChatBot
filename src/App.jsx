@@ -28,6 +28,14 @@ function loadFromStorage(key) {
   }
 }
 
+function getTimeOfDay(date = new Date()) {
+  const hour = date.getHours()
+  if (hour >= 5 && hour < 11) return 'morning'
+  if (hour >= 11 && hour < 17) return 'afternoon'
+  if (hour >= 17 && hour < 20) return 'evening'
+  return 'night'
+}
+
 function SunLoader() {
   return (
     <div className="sun-loader" role="status" aria-label="SunGPT is thinking">
@@ -46,6 +54,61 @@ function SunLoader() {
   )
 }
 
+const THEME_COPY = {
+  morning: 'Good morning',
+  afternoon: 'Good afternoon',
+  evening: 'Good evening',
+  night: 'Good night',
+}
+
+function SkyScene({ theme }) {
+  const stars = Array.from({ length: 36 }, (_, i) => ({
+    left: `${(i * 37) % 100}%`,
+    top: `${((i * 53) % 46) + 2}%`,
+    delay: `${((i * 0.13) % 1) * 2.4}s`,
+    size: i % 5 === 0 ? 4 : 2.5,
+  }))
+
+  return (
+    <div className={`welcome-sky ${theme}`}>
+      <div className="sky-gradient" />
+      <div className="horizon" />
+      {theme === 'night' ? (
+        <>
+          <div className="stars">
+            {stars.map((s, i) => (
+              <span
+                key={i}
+                className="star"
+                style={{
+                  left: s.left,
+                  top: s.top,
+                  width: `${s.size}px`,
+                  height: `${s.size}px`,
+                  animationDelay: s.delay,
+                }}
+              />
+            ))}
+          </div>
+          <div className="moon" />
+        </>
+      ) : (
+        <div className="sky-sun">
+          <div className="sun-rays" />
+          <div className="sun" />
+        </div>
+      )}
+      <div className="cloud cloud-one" />
+      <div className="cloud cloud-two" />
+      <div className="welcome-copy">
+        <span className="welcome-logo">{theme === 'night' ? '\u263E' : '\u2600'}</span>
+        <p className="welcome-title">Start a conversation with SunGPT</p>
+        <p className="welcome-sub">{THEME_COPY[theme]}</p>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarView, setSidebarView] = useState('chats')
@@ -58,6 +121,7 @@ function App() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  const [timeOfDay] = useState(() => getTimeOfDay())
   const idRef = useRef(0)
   const messagesRef = useRef([])
   const messagesEndRef = useRef(null)
@@ -73,6 +137,10 @@ function App() {
     },
     [],
   )
+
+  useEffect(() => {
+    document.body.dataset.theme = timeOfDay
+  }, [timeOfDay])
 
   const updateMessages = (msgs) => {
     messagesRef.current = msgs
@@ -407,10 +475,7 @@ function App() {
         <div className="chat-window">
           <div className="messages">
             {messages.length === 0 ? (
-              <div className="empty-state">
-                <span className="empty-icon">&#9728;</span>
-                <p>Start a conversation with SunGPT</p>
-              </div>
+              <SkyScene theme={timeOfDay} />
             ) : (
               messages.map((message) => (
                 <div key={message.id} className={`message ${message.role}`}>
