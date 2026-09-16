@@ -4,40 +4,7 @@ import Markdown from './Markdown.jsx'
 
 const CHATS_KEY = 'sungpt-chats'
 const PROJECTS_KEY = 'sungpt-projects'
-const REPLY_DELAY = 1500
 const RAY_COUNT = 8
-
-function getMockResponse() {
-  return [
-    '## Welcome to **SunGPT**',
-    '',
-    'Here is a *sample* reply demonstrating rich formatting.',
-    '',
-    '### What you can do',
-    '',
-    '- Send a message to start a conversation',
-    '- Assign chats to **projects** from the sidebar',
-    '- Reopen past chats from your history',
-    '',
-    '### Quick start',
-    '',
-    '1. Type a message and press **Enter**',
-    '2. Watch the sun loader while *SunGPT* thinks',
-    '3. Read the formatted reply right here',
-    '',
-    '> **Tip:** use markdown like headings, lists, and code blocks.',
-    '',
-    '```js',
-    'function greet(name) {',
-    '  return `Hello, ${name}!`;',
-    '}',
-    '',
-    'console.log(greet("you"));',
-    '```',
-    '',
-    'Inline code like `const x = 42` works too.',
-  ].join('\n')
-}
 
 function formatTime(timestamp) {
   const date = new Date(timestamp)
@@ -196,18 +163,11 @@ function App() {
   const idRef = useRef(0)
   const messagesRef = useRef([])
   const messagesEndRef = useRef(null)
-  const replyTimerRef = useRef(null)
+  const requestRef = useRef(0)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isThinking])
-
-  useEffect(
-    () => () => {
-      if (replyTimerRef.current) clearTimeout(replyTimerRef.current)
-    },
-    [],
-  )
 
   useEffect(() => {
     document.body.dataset.theme = timeOfDay
@@ -218,11 +178,8 @@ function App() {
     setMessages(msgs)
   }
 
-  const clearPendingReply = () => {
-    if (replyTimerRef.current) {
-      clearTimeout(replyTimerRef.current)
-      replyTimerRef.current = null
-    }
+  const invalidatePendingRequest = () => {
+    requestRef.current += 1
     setIsThinking(false)
   }
 
@@ -249,11 +206,11 @@ function App() {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(updated))
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim()
     if (!text) return
 
-    clearPendingReply()
+    const requestId = ++requestRef.current
 
     const userMsg = { id: ++idRef.current, role: 'user', content: text }
     const newMessages = [...messagesRef.current, userMsg]
@@ -265,18 +222,45 @@ function App() {
     if (chatId !== activeChatId) setActiveChatId(chatId)
 
     setIsThinking(true)
-    replyTimerRef.current = setTimeout(() => {
-      const assistantMsg = { id: ++idRef.current, role: 'assistant', content: getMockResponse() }
+    try {
+      const conversation = newMessages.map(({ role, content }) => ({
+        role,
+        content,
+      }))
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversation }),
+      })
+
+      const data = await response.json().catch(() => null)
+      if (requestRef.current !== requestId) return
+
+      const content = response.ok
+        ? data?.content || 'No response returned.'
+        : `> **SunGPT could not get a reply.**\n\n${data?.error || `The request failed with status ${response.status}.`}`
+
+      const assistantMsg = { id: ++idRef.current, role: 'assistant', content }
       const updated = [...messagesRef.current, assistantMsg]
       updateMessages(updated)
       persistChat(updated, chatId)
-      setIsThinking(false)
-      replyTimerRef.current = null
-    }, REPLY_DELAY)
+    } catch (error) {
+      if (requestRef.current !== requestId) return
+      const assistantMsg = {
+        id: ++idRef.current,
+        role: 'assistant',
+        content: `> **Connection error** — is the API running?\n\nStart it with \`vercel dev\` and try again. (${error.message})`,
+      }
+      const updated = [...messagesRef.current, assistantMsg]
+      updateMessages(updated)
+      persistChat(updated, chatId)
+    } finally {
+      if (requestRef.current === requestId) setIsThinking(false)
+    }
   }
 
   const handleNewChat = () => {
-    clearPendingReply()
+    invalidatePendingRequest()
     if (messagesRef.current.length > 0) persistChat(messagesRef.current, activeChatId)
     updateMessages([])
     setInput('')
@@ -286,7 +270,7 @@ function App() {
   }
 
   const handleLoadChat = (chatId) => {
-    clearPendingReply()
+    invalidatePendingRequest()
     if (messagesRef.current.length > 0 && chatId !== activeChatId) {
       persistChat(messagesRef.current, activeChatId)
     }
@@ -301,7 +285,7 @@ function App() {
 
   const handleClearHistory = () => {
     if (!window.confirm('Delete all saved chats? This cannot be undone.')) return
-    clearPendingReply()
+    invalidatePendingRequest()
     setChats([])
     updateMessages([])
     setInput('')
