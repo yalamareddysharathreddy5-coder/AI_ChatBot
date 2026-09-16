@@ -883,11 +883,20 @@
 }
 
 .sun {
+  position: relative;
   width: 52px;
   height: 52px;
   border-radius: 50%;
   background: radial-gradient(circle at 38% 35%, #fff9d6, #ffe066 35%, #f5af19 62%, #ff8c1a 100%);
   box-shadow: 0 0 36px rgba(245, 175, 25, 0.65), 0 0 90px rgba(255, 200, 80, 0.35);
+}
+
+.welcome-sky.morning .sun {
+  background: radial-gradient(circle at 38% 35%, #fff8dc, #ffe9a0 38%, #ffd080 62%, #ffbd80 100%);
+}
+
+.welcome-sky.afternoon .sun {
+  background: radial-gradient(circle at 38% 35%, #fffdf3, #fff176 40%, #ffdd38 62%, #ffc832 100%);
 }
 
 .welcome-sky.evening .sun {
@@ -906,6 +915,61 @@
 
 .welcome-sky.evening .sun {
   animation: sunsetGlow 8s ease-in-out infinite;
+}
+
+.welcome-sky.morning .sun::before,
+.welcome-sky.morning .sun::after,
+.welcome-sky.afternoon .sun::before,
+.welcome-sky.afternoon .sun::after,
+.welcome-sky.evening .sun::before,
+.welcome-sky.evening .sun::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: opacity;
+  animation: sunShadeShift 24s ease-in-out infinite;
+}
+
+.welcome-sky.morning .sun::before {
+  background: radial-gradient(circle at 38% 35%, #fff1c4, #ffb36b 45%, #ff9559 70%, #ff8c6b 100%);
+}
+
+.welcome-sky.morning .sun::after {
+  background: radial-gradient(circle at 38% 35%, #ffe9d6, #ffc0a3 40%, #ff9d8a 65%, #ffb7c5 100%);
+  animation-delay: -8s;
+}
+
+.welcome-sky.afternoon .sun::before {
+  background: radial-gradient(circle at 38% 35%, #ffffff, #fff3b0 45%, #ffe163 70%, #ffd23e 100%);
+}
+
+.welcome-sky.afternoon .sun::after {
+  background: radial-gradient(circle at 38% 35%, #fffbe3, #ffd94d 45%, #f7b733 70%, #f3a21c 100%);
+  animation-delay: -8s;
+}
+
+.welcome-sky.evening .sun::before {
+  background: radial-gradient(circle at 38% 35%, #ffe0bd, #ff8a5c 45%, #e65a3c 70%, #b0322e 100%);
+}
+
+.welcome-sky.evening .sun::after {
+  background: radial-gradient(circle at 38% 35%, #ffd2b3, #ff9b7a 40%, #c75a7e 65%, #8c4a6e 100%);
+  animation-delay: -8s;
+}
+
+@keyframes sunShadeShift {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes sunriseMove {
@@ -977,6 +1041,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
+  z-index: 2;
   background:
     radial-gradient(circle at 30% 40%, rgba(150, 160, 190, 0.4) 0 3px, transparent 4px),
     radial-gradient(circle at 62% 66%, rgba(150, 160, 190, 0.34) 0 4px, transparent 5px),
@@ -1034,6 +1099,7 @@
   width: 130px;
   height: 26px;
   border-radius: 100px;
+  z-index: 2;
   background: rgba(255, 255, 255, 0.22);
   filter: blur(2px);
   box-shadow: 24px 9px 0 -6px rgba(255, 255, 255, 0.2), -20px 7px 0 -8px rgba(255, 255, 255, 0.18);
@@ -1093,7 +1159,9 @@
 }
 
 .welcome-sky.night .cloud {
-  opacity: 0.28;
+  opacity: 0.3;
+  background: rgba(150, 170, 220, 0.22);
+  box-shadow: 24px 9px 0 -6px rgba(150, 170, 220, 0.18), -20px 7px 0 -8px rgba(150, 170, 220, 0.16);
 }
 
 /* Shooting stars */
@@ -1102,6 +1170,7 @@
   width: 90px;
   height: 2px;
   border-radius: 2px;
+  z-index: 2;
   background: linear-gradient(to left, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
   opacity: 0;
   animation: shootingStar 11s linear infinite;
@@ -1139,10 +1208,101 @@
   }
 }
 
+/* Planets (night) */
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 1;
+  will-change: transform;
+}
+
+.planet-saturn {
+  top: 14%;
+  left: 6%;
+  width: 34px;
+  height: 34px;
+  background: radial-gradient(circle at 32% 30%, #ffe3b0, #d9a460 55%, #8a5a2b 100%);
+  box-shadow: 0 0 18px rgba(255, 214, 150, 0.35);
+  animation: planetDriftNear 100s linear infinite;
+  animation-delay: -35s;
+}
+
+.planet-saturn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 22px;
+  margin: -11px 0 0 -32px;
+  border: 3px solid rgba(233, 199, 142, 0.55);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+}
+
+.planet-mars {
+  top: 30%;
+  left: 12%;
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle at 34% 32%, #f8a27f, #d9644f 55%, #7c2f24 100%);
+  box-shadow: 0 0 14px rgba(255, 130, 95, 0.35);
+  animation: planetDriftMid 140s linear infinite;
+  animation-delay: -75s;
+}
+
+.planet-blue {
+  top: 60%;
+  left: 18%;
+  width: 26px;
+  height: 26px;
+  z-index: 0;
+  background: radial-gradient(circle at 32% 30%, #c7e6ff, #6aa7dd 55%, #2c5a8c 100%);
+  box-shadow: 0 0 16px rgba(140, 200, 255, 0.3);
+  animation: planetDriftFar 170s linear infinite;
+  animation-delay: -120s;
+}
+
+@keyframes planetDriftNear {
+  0% {
+    transform: translateX(-20vw) translateY(0);
+  }
+  50% {
+    transform: translateX(50vw) translateY(18px);
+  }
+  100% {
+    transform: translateX(120vw) translateY(0);
+  }
+}
+
+@keyframes planetDriftMid {
+  0% {
+    transform: translateX(-24vw) translateY(0);
+  }
+  50% {
+    transform: translateX(45vw) translateY(-12px);
+  }
+  100% {
+    transform: translateX(120vw) translateY(0);
+  }
+}
+
+@keyframes planetDriftFar {
+  0% {
+    transform: translateX(-28vw) translateY(0);
+  }
+  50% {
+    transform: translateX(42vw) translateY(8px);
+  }
+  100% {
+    transform: translateX(120vw) translateY(0);
+  }
+}
+
 /* Welcome copy */
 .welcome-copy {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   text-align: center;
   padding: 1.7rem 2.2rem;
   background: rgba(10, 12, 30, 0.22);
@@ -1309,6 +1469,9 @@
   .welcome-sky .star,
   .welcome-sky .shooting-star,
   .welcome-sky .cloud,
+  .welcome-sky .planet,
+  .welcome-sky .sun::before,
+  .welcome-sky .sun::after,
   .welcome-sky.evening .sky-gradient::after {
     animation: none !important;
     will-change: auto;
