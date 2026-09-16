@@ -71,7 +71,7 @@ vercel dev
 
 `vercel dev` serves the app (typically at `http://localhost:3000`) with
 `/api/chat` available. The optional `GROQ_MODEL` env var overrides the default
-model (`llama-3.3-70b-versatile`).
+model (`openai/gpt-oss-20b`).
 
 > Running plain `npm run dev` works for the UI, but `/api/chat` will not exist,
 > so sending a message shows a connection error.
