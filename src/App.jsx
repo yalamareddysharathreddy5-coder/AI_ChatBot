@@ -149,10 +149,9 @@ function Clock({ theme }) {
   const hours24 = now.getHours()
   const hours = hours24 % 12 || 12
   const minutes = now.getMinutes()
-  const seconds = now.getSeconds()
   const ampm = hours24 >= 12 ? 'PM' : 'AM'
   const pad = (n) => String(n).padStart(2, '0')
-  const groups = [pad(hours), pad(minutes), pad(seconds)]
+  const groups = [pad(hours), pad(minutes)]
   const dateStr = now.toLocaleDateString(undefined, {
     weekday: 'short',
     month: 'short',
