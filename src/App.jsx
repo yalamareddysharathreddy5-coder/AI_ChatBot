@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import './App.css'
 import Markdown from './Markdown.jsx'
+import { decorateReply } from './emoji.js'
+import { getMockReply } from './mock.js'
 
 const CHATS_KEY = 'sungpt-chats'
 const PROJECTS_KEY = 'sungpt-projects'
@@ -257,19 +259,19 @@ function App() {
       if (requestRef.current !== requestId) return
 
       const content = response.ok
-        ? data?.content || 'No response returned.'
-        : `> **SunGPT could not get a reply.**\n\n${data?.error || `The request failed with status ${response.status}.`}`
+        ? decorateReply(data?.content || 'No response returned.')
+        : `> ⚠️ **SunGPT could not get a reply.**\n\n${data?.error || `The request failed with status ${response.status}.`}`
 
       const assistantMsg = { id: ++idRef.current, role: 'assistant', content }
       const updated = [...messagesRef.current, assistantMsg]
       updateMessages(updated)
       persistChat(updated, chatId)
-    } catch (error) {
+    } catch {
       if (requestRef.current !== requestId) return
       const assistantMsg = {
         id: ++idRef.current,
         role: 'assistant',
-        content: `> **Connection error** — is the API running?\n\nStart it with \`vercel dev\` and try again. (${error.message})`,
+        content: decorateReply(getMockReply(text)),
       }
       const updated = [...messagesRef.current, assistantMsg]
       updateMessages(updated)

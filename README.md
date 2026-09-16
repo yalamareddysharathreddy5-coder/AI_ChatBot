@@ -11,6 +11,9 @@ with syntax highlighting.
   bubbles are styled distinctly.
 - **Groq-powered replies** — messages are sent to the Groq API through a Vercel
   serverless function; the sun-loader shows while the reply is generated.
+- **Emoji decorator** — assistant replies get a light emoji touch: a relevant
+  emoji before section headings (💡 tips, ✅ steps, ⚠️ notes, 📌 summaries) and a
+  matching opener emoji, while code blocks and body paragraphs stay clean.
 - **Markdown replies** — headings, bold/italic, lists, blockquotes, and fenced
   code blocks with syntax highlighting (`react-markdown` + `rehype-highlight`).
 - **Persistence** — conversations, projects, and chat assignments are stored in
@@ -73,8 +76,9 @@ vercel dev
 `/api/chat` available. The optional `GROQ_MODEL` env var overrides the default
 model (`openai/gpt-oss-20b`).
 
-> Running plain `npm run dev` works for the UI, but `/api/chat` will not exist,
-> so sending a message shows a connection error.
+> Running plain `npm run dev` works for the UI; `/api/chat` will not exist, so
+> sending a message falls back to a sample (mock) reply, emoji-decorated, so the
+> interface can still be previewed.
 
 ### Vercel (production)
 
