@@ -226,7 +226,7 @@ function App() {
     setIsThinking(false)
   }
 
-  const persistChat = (msgs, chatId) => {
+  const persistChat = (msgs, chatId, projectId = null) => {
     if (msgs.length === 0) return chatId
 
     const firstUserMsg = msgs.find((m) => m.role === 'user')?.content || 'New Chat'
@@ -237,7 +237,7 @@ function App() {
       const existing = prev.find((c) => c.id === id)
       const updated = existing
         ? prev.map((c) => (c.id === id ? { ...c, title: firstUserMsg, messages: msgs } : c))
-        : [...prev, { id, title: firstUserMsg, timestamp: Date.now(), messages: msgs }]
+        : [...prev, { id, title: firstUserMsg, timestamp: Date.now(), messages: msgs, projectId }]
       localStorage.setItem(CHATS_KEY, JSON.stringify(updated))
       return updated
     })
@@ -312,6 +312,36 @@ function App() {
     setSidebarOpen(false)
   }
 
+  const handleNewProjectChat = (projectId) => {
+    invalidatePendingRequest()
+    if (messagesRef.current.length > 0) persistChat(messagesRef.current, activeChatId)
+
+    const id = crypto.randomUUID()
+    setChats((prev) => {
+      const updated = [
+        ...prev,
+        { id, title: 'New Chat', timestamp: Date.now(), messages: [], projectId },
+      ]
+      localStorage.setItem(CHATS_KEY, JSON.stringify(updated))
+      return updated
+    })
+    setProjects((prev) => {
+      const updated = prev.map((p) =>
+        p.id === projectId && !p.chatIds.includes(id)
+          ? { ...p, chatIds: [...p.chatIds, id] }
+          : p,
+      )
+      persistProjects(updated)
+      return updated
+    })
+
+    updateMessages([])
+    setInput('')
+    setActiveChatId(id)
+    idRef.current = 0
+    setSidebarOpen(false)
+  }
+
   const handleLoadChat = (chatId) => {
     invalidatePendingRequest()
     if (messagesRef.current.length > 0 && chatId !== activeChatId) {
@@ -364,6 +394,8 @@ function App() {
   }
 
   const toggleChatInProject = (chatId, projectId) => {
+    const project = projects.find((p) => p.id === projectId)
+    const willAssign = project ? !project.chatIds.includes(chatId) : false
     setProjects((prev) => {
       const updated = prev.map((p) => {
         if (p.id !== projectId) return p
@@ -376,6 +408,13 @@ function App() {
         }
       })
       persistProjects(updated)
+      return updated
+    })
+    setChats((prev) => {
+      const updated = prev.map((c) =>
+        c.id === chatId ? { ...c, projectId: willAssign ? projectId : null } : c,
+      )
+      localStorage.setItem(CHATS_KEY, JSON.stringify(updated))
       return updated
     })
   }
@@ -427,7 +466,9 @@ function App() {
               {chats.length === 0 ? (
                 <p className="history-empty">No saved chats yet</p>
               ) : (
-                [...chats].reverse().map((chat) => (
+                [...chats].reverse().map((chat) => {
+                const project = chat.projectId ? getProjectById(chat.projectId) : null
+                return (
                   <div
                     key={chat.id}
                     className={`history-item${chat.id === activeChatId ? ' active' : ''}`}
@@ -437,6 +478,9 @@ function App() {
                       onClick={() => handleLoadChat(chat.id)}
                     >
                       <span className="history-item-title">{chat.title}</span>
+                      {project && (
+                        <span className="history-item-project">{project.name}</span>
+                      )}
                       <span className="history-item-time">
                         {formatTime(chat.timestamp)}
                       </span>
@@ -480,8 +524,9 @@ function App() {
                       </div>
                     )}
                   </div>
-                ))
-              )}
+                )
+              })
+            )}
             </div>
 
             {chats.length > 0 && (
@@ -543,10 +588,18 @@ function App() {
 
             <h3 className="project-detail-header">{selectedProject.name}</h3>
 
+            <button
+              className="new-chat-btn project-new-chat-btn"
+              onClick={() => handleNewProjectChat(selectedProject.id)}
+            >
+              + New Chat in Project
+            </button>
+
             <div className="project-chat-list">
               {projectChats.length === 0 ? (
                 <p className="project-empty">
-                  No chats assigned. Use &ldquo;+&rdquo; on a history item to add one.
+                  No chats yet. Use &ldquo;+ New Chat&rdquo; to start one in this
+                  project, or &ldquo;+&rdquo; on a history item to add an existing chat.
                 </p>
               ) : (
                 [...projectChats]

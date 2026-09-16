@@ -144,6 +144,21 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+.history-item-project {
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ffd76a;
+  background: rgba(245, 175, 25, 0.12);
+  border: 1px solid rgba(245, 175, 25, 0.25);
+  border-radius: 6px;
+  padding: 0.1rem 0.4rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .history-item-assign {
   background: rgba(255, 255, 255, 0.06);
   border: none;
@@ -372,6 +387,11 @@
 .clear-history-btn:hover {
   background: rgba(241, 39, 17, 0.25);
   color: #fff;
+}
+
+.project-new-chat-btn {
+  width: 100%;
+  margin-bottom: 0.75rem;
 }
 
 /* ── Menu Toggle (mobile) ── */
