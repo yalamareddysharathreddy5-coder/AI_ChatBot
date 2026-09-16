@@ -41,29 +41,85 @@
   background-clip: text;
 }
 
-.sidebar-nav {
+.new-chat-btn {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.2s;
+}
+
+.new-chat-btn:hover {
+  opacity: 0.85;
+}
+
+.history-list {
+  flex: 1;
+  margin-top: 1rem;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  min-height: 0;
 }
 
-.nav-item {
+.history-empty {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.25rem;
+}
+
+.history-item {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-radius: 10px;
-  padding: 0.7rem 1rem;
+  padding: 0.6rem 0.75rem;
   color: #ccc;
-  font-size: 0.9rem;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   transition: background 0.2s;
 }
 
-.nav-item:hover,
-.nav-item.active {
+.history-item:hover,
+.history-item.active {
   background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.history-item-title {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item-time {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.clear-history-btn {
+  margin-top: 1rem;
+  background: rgba(241, 39, 17, 0.15);
+  border: 1px solid rgba(241, 39, 17, 0.35);
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  color: #f27a6f;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.clear-history-btn:hover {
+  background: rgba(241, 39, 17, 0.25);
   color: #fff;
 }
 
@@ -283,6 +339,19 @@
 }
 
 .messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 3px;
 }
