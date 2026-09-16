@@ -491,6 +491,156 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
+/* ── Markdown Content ── */
+.markdown {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  margin: 1em 0 0.5em;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.markdown h1 {
+  font-size: 1.3rem;
+}
+
+.markdown h2 {
+  font-size: 1.15rem;
+}
+
+.markdown h3 {
+  font-size: 1.02rem;
+}
+
+.markdown h4 {
+  font-size: 0.95rem;
+}
+
+.markdown h1:first-child,
+.markdown h2:first-child,
+.markdown h3:first-child,
+.markdown h4:first-child {
+  margin-top: 0;
+}
+
+.markdown p {
+  margin: 0.55em 0;
+}
+
+.markdown ul,
+.markdown ol {
+  margin: 0.55em 0;
+  padding-left: 1.4rem;
+}
+
+.markdown li {
+  margin: 0.25em 0;
+}
+
+.markdown li::marker {
+  color: #f5af19;
+}
+
+.markdown strong {
+  color: #fff;
+}
+
+.markdown a {
+  color: #ffd76a;
+  text-decoration: underline;
+}
+
+.markdown blockquote {
+  margin: 0.7em 0;
+  padding: 0.5em 0.9em;
+  border-left: 3px solid #f5af19;
+  background: rgba(245, 175, 25, 0.08);
+  border-radius: 0 8px 8px 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.markdown blockquote p {
+  margin: 0.25em 0;
+}
+
+.markdown code {
+  font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+  color: #ffd76a;
+}
+
+.markdown pre {
+  margin: 0.8em 0;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0d1117;
+  max-width: 100%;
+}
+
+.markdown pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.88em;
+  color: #e6edf3;
+}
+
+.markdown pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+.markdown pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.markdown hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 1em 0;
+}
+
+.markdown table {
+  border-collapse: collapse;
+  margin: 0.7em 0;
+  font-size: 0.9em;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+
+.markdown th {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.markdown input {
+  accent-color: #f5af19;
+}
+
 .empty-icon {
   font-size: 3rem;
   display: block;

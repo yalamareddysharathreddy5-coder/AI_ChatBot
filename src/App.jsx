@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import Markdown from './Markdown.jsx'
 
 const CHATS_KEY = 'sungpt-chats'
 const PROJECTS_KEY = 'sungpt-projects'
@@ -7,7 +8,35 @@ const REPLY_DELAY = 1500
 const RAY_COUNT = 8
 
 function getMockResponse() {
-  return 'This is a canned SunGPT response. Ask me anything and I will act like a real assistant soon!'
+  return [
+    '## Welcome to **SunGPT**',
+    '',
+    'Here is a *sample* reply demonstrating rich formatting.',
+    '',
+    '### What you can do',
+    '',
+    '- Send a message to start a conversation',
+    '- Assign chats to **projects** from the sidebar',
+    '- Reopen past chats from your history',
+    '',
+    '### Quick start',
+    '',
+    '1. Type a message and press **Enter**',
+    '2. Watch the sun loader while *SunGPT* thinks',
+    '3. Read the formatted reply right here',
+    '',
+    '> **Tip:** use markdown like headings, lists, and code blocks.',
+    '',
+    '```js',
+    'function greet(name) {',
+    '  return `Hello, ${name}!`;',
+    '}',
+    '',
+    'console.log(greet("you"));',
+    '```',
+    '',
+    'Inline code like `const x = 42` works too.',
+  ].join('\n')
 }
 
 function formatTime(timestamp) {
@@ -482,7 +511,13 @@ function App() {
                   {message.role === 'assistant' && (
                     <span className="message-label">SunGPT</span>
                   )}
-                  <div className="bubble">{message.content}</div>
+                  {message.role === 'assistant' ? (
+                    <div className="bubble">
+                      <Markdown content={message.content} />
+                    </div>
+                  ) : (
+                    <div className="bubble">{message.content}</div>
+                  )}
                 </div>
               ))
             )}
