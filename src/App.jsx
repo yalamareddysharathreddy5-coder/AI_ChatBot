@@ -105,6 +105,18 @@ function SkyScene({ theme }) {
   )
 }
 
+const CLOCK_EMOJI = {
+  morning: '☀️',
+  afternoon: '🌞',
+  evening: '🌇',
+  night: '🌙',
+}
+
+function isWeekend(date) {
+  const day = date.getDay()
+  return day === 0 || day === 6
+}
+
 function Clock({ theme }) {
   const [now, setNow] = useState(() => new Date())
 
@@ -124,6 +136,8 @@ function Clock({ theme }) {
     month: 'short',
     day: 'numeric',
   })
+  const periodEmoji = CLOCK_EMOJI[getTimeOfDay(now)]
+  const dayEmoji = isWeekend(now) ? '🎉' : '📅'
 
   return (
     <div className={`clock clock-${theme}`}>
@@ -139,8 +153,14 @@ function Clock({ theme }) {
           </Fragment>
         ))}
         <span className="clock-ampm">{ampm}</span>
+        <span key={periodEmoji} className="clock-emoji">
+          {periodEmoji}
+        </span>
       </div>
-      <div key={dateStr} className="clock-date">
+      <div key={`${dateStr}-${dayEmoji}`} className="clock-date">
+        <span key={dayEmoji} className="clock-date-emoji">
+          {dayEmoji}
+        </span>
         {dateStr}
       </div>
     </div>
