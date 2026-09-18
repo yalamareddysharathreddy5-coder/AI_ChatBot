@@ -4,8 +4,8 @@ import Markdown from './Markdown.jsx'
 import { decorateReply } from './emoji.js'
 import { getMockReply } from './mock.js'
 
-const CHATS_KEY = 'sungpt-chats'
-const PROJECTS_KEY = 'sungpt-projects'
+const CHATS_KEY = 'sun-chat-bot-chats'
+const PROJECTS_KEY = 'sun-chat-bot-projects'
 const RAY_COUNT = 8
 
 function formatTime(timestamp) {
@@ -36,7 +36,7 @@ function getTimeOfDay(date = new Date()) {
 
 function SunLoader() {
   return (
-    <div className="sun-loader" role="status" aria-label="SunGPT is thinking">
+    <div className="sun-loader" role="status" aria-label="Sun Chat Bot is thinking">
       <div className="sun-halo" />
       <div className="sun-core" />
       <div className="sun-rays">
@@ -121,7 +121,7 @@ function SkyScene({ theme }) {
       <div className="cloud cloud-three" />
       <div className="welcome-copy">
         <span className="welcome-logo">{theme === 'night' ? '\u263E' : '\u2600'}</span>
-        <p className="welcome-title">Start a conversation with SunGPT</p>
+        <p className="welcome-title">Start a conversation with Sun Chat Bot</p>
         <p className="welcome-sub">{THEME_COPY[theme]}</p>
       </div>
     </div>
@@ -281,7 +281,7 @@ function App() {
 
       const content = response.ok
         ? decorateReply(data?.content || 'No response returned.')
-        : `> ⚠️ **SunGPT could not get a reply.**\n\n${data?.error || `The request failed with status ${response.status}.`}`
+        : `> ⚠️ **Sun Chat Bot could not get a reply.**\n\n${data?.error || `The request failed with status ${response.status}.`}`
 
       const assistantMsg = { id: ++idRef.current, role: 'assistant', content }
       const updated = [...messagesRef.current, assistantMsg]
@@ -448,7 +448,7 @@ function App() {
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <span className="logo-icon">&#9728;</span>
-          <h1 className="logo-text">SunGPT</h1>
+          <h1 className="logo-text">Sun Chat Bot</h1>
         </div>
 
         {sidebarView === 'chats' && (
@@ -632,7 +632,7 @@ function App() {
               messages.map((message) => (
                 <div key={message.id} className={`message ${message.role}`}>
                   {message.role === 'assistant' && (
-                    <span className="message-label">SunGPT</span>
+                    <span className="message-label">Sun Chat Bot</span>
                   )}
                   {message.role === 'assistant' ? (
                     <div className="bubble">
@@ -646,7 +646,7 @@ function App() {
             )}
             {isThinking && (
               <div className="message assistant">
-                <span className="message-label">SunGPT</span>
+                <span className="message-label">Sun Chat Bot</span>
                 <SunLoader />
               </div>
             )}

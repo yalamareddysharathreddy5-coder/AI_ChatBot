@@ -1,4 +1,4 @@
-# SunGPT
+# Sun Chat Bot
 
 A glassmorphism chat interface with a sun-themed, time-aware animated welcome
 screen, live clock, projects, and locally persisted chat history. Assistant
@@ -174,7 +174,7 @@ vercel --prod                 # production deployment
 ## Notes
 
 - All chat state is client-side and stored under the `localStorage` keys
-  `sungpt-chats` and `sungpt-projects`.
+  `sun-chat-bot-chats` and `sun-chat-bot-projects`.
 - The only network call is `POST /api/chat`, served by a Vercel serverless
   function (`api/chat.js`). The Groq API key lives in the server environment,
   never in the browser bundle.

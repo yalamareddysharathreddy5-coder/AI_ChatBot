@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     console.error('[api/chat] GROQ_API_KEY is not configured on the server.')
     send(res, 500, {
       error:
-        'SunGPT is not configured yet. Add the GROQ_API_KEY environment variable in Vercel > Project > Settings > Environment Variables.',
+        'Sun Chat Bot is not configured yet. Add the GROQ_API_KEY environment variable in Vercel > Project > Settings > Environment Variables.',
     })
     return
   }
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('[api/chat] network error calling Groq:', error)
     send(res, 502, {
-      error: 'SunGPT could not reach the AI provider. Please try again later.',
+      error: 'Sun Chat Bot could not reach the AI provider. Please try again later.',
     })
     return
   }
