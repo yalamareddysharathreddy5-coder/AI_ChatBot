@@ -16,6 +16,9 @@ with syntax highlighting.
 - **Live weather** — ask a weather question and (after allowing browser location
   access) the current weather for your location is fetched live and passed to the
   assistant, so it answers from real data instead of guessing.
+- **Location context** — with a single permission tap, your resolved place
+  (e.g. "Hyderabad, Telangana, India") is shared with the assistant for
+  location-based questions and cached locally in `localStorage`.
 - **Emoji decorator** — assistant replies get a light emoji touch: a relevant
   emoji before section headings (💡 tips, ✅ steps, ⚠️ notes, 📌 summaries) and a
   matching opener emoji, while code blocks and body paragraphs stay clean.
@@ -67,6 +70,17 @@ context so the assistant can answer time and weather questions accurately:
 - **Date/time** — always included. The browser sends the current timestamp and
   your IANA timezone, formatted like
   `Current date/time: Thursday, 18 September 2026, 11:45 PM IST`.
+- **Location** — requested on first load (or on the first location/weather
+  question) with a one-time banner explaining the request, then the browser's
+  permission prompt. The raw coordinates are reverse-geocoded server-side via
+  [Nominatim](https://nominatim.openstreetmap.org/) (the free OpenStreetMap
+  geocoder) into a readable place name like *Hyderabad, Telangana, India*. The
+  resolved place is cached in `localStorage`
+  (`sun-chat-bot-location`, refreshable via the 📍 chip) and
+  injected into the system prompt:
+  `- User's current location: Hyderabad, Telangana, India`. For "nearby places"
+  questions, the assistant reasons generally from the city/region name, since no
+  live places directory is connected.
 - **Weather** — fetched on demand. When a weather-related message is detected,
   the browser requests your location (browser permission prompt) with the
   [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API)
@@ -78,6 +92,11 @@ context so the assistant can answer time and weather questions accurately:
 
 If the weather fetch fails, non-weather questions are unaffected; the assistant
 only mentions the failure if you specifically asked about the weather.
+
+The browser's Geolocation API needs a **secure context**: `https://` on your
+domain or `http://localhost`. If permission is denied, nothing breaks — weather
+and location questions simply fall back to the assistant politely asking for
+your city, and a 📍 "Enable" chip lets you re-enable sharing later.
 
 ### Using a keyed weather provider (optional)
 
@@ -201,7 +220,10 @@ vercel --prod                 # production deployment
 ├── vercel.json         # Vercel build/output config
 ├── .env.example        # Documented env vars (real .env is git-ignored)
 ├── api/
-│   └── chat.js         # Vercel serverless function proxying to Groq
+│   ├── chat.js         # Vercel serverless function proxying to Groq
+│   └── location.js     # Reverse-geocodes shared coordinates via Nominatim
+├── lib/
+│   └── geocode.js      # Shared Nominatim reverse-geocoding helper
 ├── public/             # Static assets served as-is (favicon, icons)
 └── src/
     ├── main.jsx        # React root
@@ -214,9 +236,18 @@ vercel --prod                 # production deployment
 ## Notes
 
 - All chat state is client-side and stored under the `localStorage` keys
-  `sun-chat-bot-chats` and `sun-chat-bot-projects`.
+  `sun-chat-bot-chats` and `sun-chat-bot-projects`; your resolved location is
+  cached under `sun-chat-bot-location`.
 - The main network call is `POST /api/chat`, served by a Vercel serverless
   function (`api/chat.js`). The Groq API key lives in the server environment,
   never in the browser bundle. For weather questions, the server additionally
   calls Open-Meteo (default, keyless) or OpenWeatherMap (if `WEATHER_API_KEY` is
   set) — always from the server, so no weather API key reaches the client.
+- Location coordinates are reverse-geocoded server-side via Nominatim
+  (`/api/location`) — raw `latitude`/`longitude` are never sent to Groq; only the
+  resolved place name is included in the prompt. When coords are sent to
+  `/api/chat` without a cached name, the server resolves the place itself.
+- Nominatim's free reverse geocoder (OpenStreetMap) is used; no API key needed.
+  The assistant is instructed not to invent real business names, addresses,
+  phone numbers, or opening hours for "nearby" questions — there is no places
+  directory connected.

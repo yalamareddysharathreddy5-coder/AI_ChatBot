@@ -1,3 +1,5 @@
+import { reverseGeocode } from '../lib/geocode.js'
+
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast'
 const OPENWEATHERMAP_URL = 'https://api.openweathermap.org/data/2.5/weather'
@@ -161,13 +163,33 @@ export function formatWeather(weather) {
     : parts.join(', ')
 }
 
-export function buildSystemPrompt({ dateTime, weatherText, weatherUnavailable }) {
+export function buildSystemPrompt({
+  dateTime,
+  weatherText,
+  weatherUnavailable,
+  locationLabel,
+  locationUnavailable,
+}) {
   const lines = [
     'You are Sun Chat Bot, a helpful AI assistant.',
     '',
     'You have access to the following real-time context:',
     `- Current date/time: ${dateTime}`,
   ]
+
+  if (locationLabel) {
+    lines.push(`- User's current location: ${locationLabel}`)
+    lines.push(
+      '- The location above is real, reverse-geocoded from the user-shared browser location. Use it for location-based questions (what city/region/country they are in, local weather, local time).',
+    )
+    lines.push(
+      '- For questions about nearby places, reason generally from the city/region name only. There is no live places directory connected, so never invent real business names, addresses, phone numbers, or opening hours.',
+    )
+  } else if (locationUnavailable) {
+    lines.push(
+      "- Note: the user asked about their location, but location access is not available (permission denied, geolocation unsupported, or the location could not be resolved). Tell the user you do not have access to their location and ask them to allow location sharing or name their city. Do not guess or invent their location.",
+    )
+  }
 
   if (weatherText) {
     lines.push(`- Current weather: ${weatherText}`)
@@ -182,7 +204,7 @@ export function buildSystemPrompt({ dateTime, weatherText, weatherUnavailable })
 
   lines.push(
     '',
-    'Use this information to answer accurately when relevant. Do not claim you lack access to time or weather if this context is provided.',
+    'Use this information to answer accurately when relevant. Do not claim you lack access to time, weather, or location if this context is provided.',
   )
 
   return lines.join('\n')
@@ -218,14 +240,19 @@ export default async function handler(req, res) {
     return
   }
 
-  // Build real-time context (date/time always; weather on demand).
+  // Build real-time context (date/time always; weather and location on demand).
   const dateTime =
     formatDateTime(body?.clientTime, body?.timeZone) ||
     formatDateTime(new Date().toISOString()) ||
     'unknown'
   const wantsWeather = body?.wantsWeather === true
+  const wantsLocation = body?.wantsLocation === true
   const latitude = typeof body?.latitude === 'number' ? body.latitude : null
   const longitude = typeof body?.longitude === 'number' ? body.longitude : null
+  const locationName =
+    typeof body?.locationName === 'string' && body.locationName.trim()
+      ? body.locationName.trim()
+      : null
 
   let weatherText = null
   let weatherUnavailable = false
@@ -241,10 +268,25 @@ export default async function handler(req, res) {
     weatherUnavailable = true
   }
 
+  // Resolve a readable place name when the client sent coords but no label yet.
+  let locationLabel = locationName
+  let resolvedLocation = null
+  if (!locationLabel && latitude !== null && longitude !== null) {
+    try {
+      resolvedLocation = await reverseGeocode(latitude, longitude)
+      locationLabel = resolvedLocation.label
+    } catch (error) {
+      console.error('[api/chat] reverse geocoding failed:', error)
+    }
+  }
+  const locationUnavailable = wantsLocation && !locationLabel
+
   const systemPrompt = buildSystemPrompt({
     dateTime,
     weatherText,
     weatherUnavailable,
+    locationLabel,
+    locationUnavailable,
   })
   const model = process.env.GROQ_MODEL || DEFAULT_MODEL
 
@@ -309,5 +351,8 @@ export default async function handler(req, res) {
     return
   }
 
-  send(res, 200, { content })
+  send(res, 200, {
+    content,
+    ...(resolvedLocation ? { location: resolvedLocation } : {}),
+  })
 }

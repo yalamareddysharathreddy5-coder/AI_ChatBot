@@ -6,6 +6,8 @@ import { getMockReply } from './mock.js'
 
 const CHATS_KEY = 'sun-chat-bot-chats'
 const PROJECTS_KEY = 'sun-chat-bot-projects'
+const LOCATION_KEY = 'sun-chat-bot-location'
+const LOCATION_DENIED_KEY = 'sun-chat-bot-location-denied'
 const RAY_COUNT = 8
 
 function formatTime(timestamp) {
@@ -41,7 +43,14 @@ function isWeatherQuery(text) {
   return WEATHER_QUERY_RE.test(String(text || ''))
 }
 
-function getCoordinates() {
+const LOCATION_QUERY_RE =
+  /\b(where am i|where do i (?:live|stay|belong)|what (?:city|town|village|state|region|country|neighborhood|neighbourhood) (?:am i|is this|do i (?:live|stay|belong))|what is my (?:current |exact )?location|my location|nearby|near me|close to me|around me|closest|nearest|how far|how far away|directions|where is|which (?:city|town|village|state|region|country|neighborhood|neighbourhood)|geolocation|gps coordinates|local)\b/i
+
+function isLocationQuery(text) {
+  return LOCATION_QUERY_RE.test(String(text || ''))
+}
+
+function getCoordinates(options = {}) {
   return new Promise((resolve) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       resolve(null)
@@ -54,9 +63,50 @@ function getCoordinates() {
           longitude: position.coords.longitude,
         }),
       () => resolve(null),
-      { timeout: 8000, maximumAge: 10 * 60 * 1000 }
+      { timeout: 8000, maximumAge: 10 * 60 * 1000, ...options }
     )
   })
+}
+
+function loadStoredLocation() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(LOCATION_KEY))
+    return stored && typeof stored === 'object' ? stored : null
+  } catch {
+    return null
+  }
+}
+
+function saveStoredLocation(location) {
+  try {
+    localStorage.setItem(LOCATION_KEY, JSON.stringify(location))
+  } catch {
+    // storage unavailable or full; location just won't persist across reloads
+  }
+}
+
+function hasLocationDeniedFlag() {
+  return localStorage.getItem(LOCATION_DENIED_KEY) === '1'
+}
+
+function persistLocationDeniedFlag(value) {
+  if (value) localStorage.setItem(LOCATION_DENIED_KEY, '1')
+  else localStorage.removeItem(LOCATION_DENIED_KEY)
+}
+
+async function resolveLocationName(latitude, longitude) {
+  try {
+    const response = await fetch('/api/location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ latitude, longitude }),
+    })
+    if (!response.ok) return null
+    const data = await response.json()
+    return data?.label || null
+  } catch {
+    return null
+  }
 }
 
 function SunLoader() {
@@ -228,10 +278,26 @@ function App() {
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [timeOfDay] = useState(() => getTimeOfDay())
+  const [location, setLocation] = useState(() => loadStoredLocation())
+  const [locationDenied, setLocationDenied] = useState(() => hasLocationDeniedFlag())
+  const [showLocationBanner, setShowLocationBanner] = useState(() => {
+    const stored = loadStoredLocation()
+    return !(stored?.latitude != null && stored?.longitude != null) && !hasLocationDeniedFlag()
+  })
   const idRef = useRef(0)
   const messagesRef = useRef([])
   const messagesEndRef = useRef(null)
   const requestRef = useRef(0)
+  const locationRef = useRef(
+    loadStoredLocation() || { latitude: null, longitude: null, place: null }
+  )
+  const locationInitRef = useRef(false)
+  const locationPendingRef = useRef(false)
+
+  const setLocationState = (loc) => {
+    locationRef.current = loc
+    setLocation(loc)
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -240,6 +306,41 @@ function App() {
   useEffect(() => {
     document.body.dataset.theme = timeOfDay
   }, [timeOfDay])
+
+  const requestLocation = async (refresh = false) => {
+    if (locationPendingRef.current) return null
+    locationPendingRef.current = true
+    try {
+      const coords = await getCoordinates(refresh ? { maximumAge: 0 } : {})
+      if (!coords) {
+        persistLocationDeniedFlag(true)
+        setLocationDenied(true)
+        return null
+      }
+      persistLocationDeniedFlag(false)
+      setLocationDenied(false)
+      const place = await resolveLocationName(coords.latitude, coords.longitude)
+      const loc = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        place,
+      }
+      setLocationState(loc)
+      saveStoredLocation(loc)
+      return loc
+    } finally {
+      locationPendingRef.current = false
+    }
+  }
+
+  useEffect(() => {
+    if (locationInitRef.current) return
+    locationInitRef.current = true
+    const stored = locationRef.current
+    if (stored?.latitude != null && stored?.longitude != null) return
+    if (hasLocationDeniedFlag()) return
+    requestLocation()
+  }, [])
 
   const updateMessages = (msgs) => {
     messagesRef.current = msgs
@@ -297,13 +398,29 @@ function App() {
       }))
 
       const wantsWeather = isWeatherQuery(text)
-      let latitude
-      let longitude
-      if (wantsWeather) {
-        const coords = await getCoordinates()
-        if (coords) {
-          latitude = coords.latitude
-          longitude = coords.longitude
+      const wantsLocation = isLocationQuery(text)
+
+      const stored = locationRef.current
+      let coords =
+        stored?.latitude != null && stored?.longitude != null
+          ? { latitude: stored.latitude, longitude: stored.longitude }
+          : null
+      let place = stored?.place || null
+
+      if ((wantsWeather || wantsLocation) && !coords) {
+        const resolved = await requestLocation()
+        if (resolved) {
+          coords = { latitude: resolved.latitude, longitude: resolved.longitude }
+          place = resolved.place || null
+        } else if (
+          locationRef.current?.latitude != null &&
+          locationRef.current?.longitude != null
+        ) {
+          coords = {
+            latitude: locationRef.current.latitude,
+            longitude: locationRef.current.longitude,
+          }
+          place = locationRef.current.place || null
         }
       }
 
@@ -315,13 +432,25 @@ function App() {
           clientTime: new Date().toISOString(),
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           wantsWeather,
-          latitude,
-          longitude,
+          wantsLocation,
+          latitude: coords?.latitude ?? null,
+          longitude: coords?.longitude ?? null,
+          locationName: place,
         }),
       })
 
       const data = await response.json().catch(() => null)
       if (requestRef.current !== requestId) return
+
+      if (response.ok && data?.location) {
+        const loc = {
+          latitude: data.location.latitude,
+          longitude: data.location.longitude,
+          place: data.location.label,
+        }
+        setLocationState(loc)
+        saveStoredLocation(loc)
+      }
 
       const content = response.ok
         ? decorateReply(data?.content || 'No response returned.')
@@ -669,6 +798,66 @@ function App() {
       <main className="chat-area">
         <div className="chat-window">
           <Clock theme={timeOfDay} />
+          {showLocationBanner && !location && !locationDenied && (
+            <div className="location-banner" role="region" aria-label="Location permission">
+              <span className="location-banner-text">
+                📍 Sun Chat Bot would like your location to answer location/weather-based
+                questions.
+              </span>
+              <span className="location-banner-actions">
+                <button
+                  className="location-banner-btn"
+                  onClick={() => {
+                    setShowLocationBanner(false)
+                    requestLocation()
+                  }}
+                >
+                  Allow
+                </button>
+                <button
+                  className="location-banner-btn muted"
+                  onClick={() => setShowLocationBanner(false)}
+                >
+                  Not now
+                </button>
+              </span>
+            </div>
+          )}
+          <div className="location-bar">
+            {location?.place ? (
+              <span className="location-chip">
+                <span className="location-pin">📍</span>
+                <span className="location-name">{location.place}</span>
+                <button
+                  className="location-action"
+                  onClick={() => requestLocation(true)}
+                  aria-label="Update location"
+                  title="Update location"
+                >
+                  ↻
+                </button>
+              </span>
+            ) : locationDenied ? (
+              <span className="location-chip">
+                <span className="location-pin">📍</span>
+                <span className="location-name">Location off</span>
+                <button
+                  className="location-action"
+                  onClick={() => requestLocation(false)}
+                >
+                  Enable
+                </button>
+              </span>
+            ) : !showLocationBanner ? (
+              <button
+                className="location-chip location-share"
+                onClick={() => requestLocation(false)}
+              >
+                <span className="location-pin">📍</span>
+                <span className="location-name">Share location</span>
+              </button>
+            ) : null}
+          </div>
           <div className="messages">
             {messages.length === 0 ? (
               <SkyScene theme={timeOfDay} />
