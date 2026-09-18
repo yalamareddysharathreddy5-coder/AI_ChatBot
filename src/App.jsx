@@ -34,6 +34,31 @@ function getTimeOfDay(date = new Date()) {
   return 'night'
 }
 
+const WEATHER_QUERY_RE =
+  /\b(weather|forecast|temperature|humidity|windy|wind speed|raining|rain(?:fall|y|ing)?|sunny|sunshine|snow(?:fall|ing)?|thunder(?:storm)?|drizzle|overcast|fog(?:gy)?|hail|humid|outside|precipitation|degrees|celsius|fahrenheit|how (?:hot|cold) is it|is it (?:hot|cold|warm|sunny|rainy|raining)|today'?s weather)\b/i
+
+function isWeatherQuery(text) {
+  return WEATHER_QUERY_RE.test(String(text || ''))
+}
+
+function getCoordinates() {
+  return new Promise((resolve) => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      resolve(null)
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) =>
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }),
+      () => resolve(null),
+      { timeout: 8000, maximumAge: 10 * 60 * 1000 }
+    )
+  })
+}
+
 function SunLoader() {
   return (
     <div className="sun-loader" role="status" aria-label="Sun Chat Bot is thinking">
@@ -270,10 +295,29 @@ function App() {
         role,
         content,
       }))
+
+      const wantsWeather = isWeatherQuery(text)
+      let latitude
+      let longitude
+      if (wantsWeather) {
+        const coords = await getCoordinates()
+        if (coords) {
+          latitude = coords.latitude
+          longitude = coords.longitude
+        }
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversation }),
+        body: JSON.stringify({
+          messages: conversation,
+          clientTime: new Date().toISOString(),
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          wantsWeather,
+          latitude,
+          longitude,
+        }),
       })
 
       const data = await response.json().catch(() => null)

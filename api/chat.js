@@ -1,7 +1,191 @@
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
+const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast'
+const OPENWEATHERMAP_URL = 'https://api.openweathermap.org/data/2.5/weather'
+const WEATHER_FETCH_TIMEOUT_MS = 7000
+
+const WMO_WEATHER_CODES = {
+  0: 'Clear sky',
+  1: 'Mainly clear',
+  2: 'Partly cloudy',
+  3: 'Overcast',
+  45: 'Fog',
+  48: 'Depositing rime fog',
+  51: 'Light drizzle',
+  53: 'Drizzle',
+  55: 'Dense drizzle',
+  56: 'Light freezing drizzle',
+  57: 'Dense freezing drizzle',
+  61: 'Slight rain',
+  63: 'Rain',
+  65: 'Heavy rain',
+  66: 'Light freezing rain',
+  67: 'Heavy freezing rain',
+  71: 'Slight snow fall',
+  73: 'Snow fall',
+  75: 'Heavy snow fall',
+  77: 'Snow grains',
+  80: 'Slight rain showers',
+  81: 'Rain showers',
+  82: 'Violent rain showers',
+  85: 'Slight snow showers',
+  86: 'Heavy snow showers',
+  95: 'Thunderstorm',
+  96: 'Thunderstorm with slight hail',
+  99: 'Thunderstorm with heavy hail',
+}
 
 function send(res, status, body) {
   res.status(status).json(body)
+}
+
+function round(value, decimals = 1) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Number(value.toFixed(decimals))
+    : null
+}
+
+function safeTimeZone(value) {
+  if (typeof value !== 'string' || !value) return undefined
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value })
+    return value
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Formats an ISO timestamp into a human-friendly string like:
+ * "Thursday, 18 September 2026, 11:45 PM IST"
+ */
+export function formatDateTime(dateValue, timeZoneValue) {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue)
+  if (Number.isNaN(date.getTime())) return null
+
+  const tz = safeTimeZone(timeZoneValue) || 'UTC'
+  const dateParts = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: tz,
+  }).formatToParts(date)
+  const timeParts = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short',
+    timeZone: tz,
+  }).formatToParts(date)
+
+  const part = (parts, type) => (parts.find((p) => p.type === type) || {}).value
+
+  return `${part(dateParts, 'weekday')}, ${part(dateParts, 'day')} ${part(dateParts, 'month')} ${part(dateParts, 'year')}, ${part(timeParts, 'hour')}:${part(timeParts, 'minute')} ${part(timeParts, 'dayPeriod')} ${part(timeParts, 'timeZoneName')}`
+}
+
+async function fetchJSONWithTimeout(url, timeoutMs = WEATHER_FETCH_TIMEOUT_MS) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+    if (!response.ok) throw new Error(`weather service returned ${response.status}`)
+    return await response.json()
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/**
+ * Fetches the current weather for a location.
+ * Uses Open-Meteo by default (no API key). If the WEATHER_API_KEY env var is
+ * set, it uses OpenWeatherMap instead. Throws on any failure so the caller can
+ * degrade gracefully.
+ */
+export async function fetchWeather(latitude, longitude) {
+  const apiKey = process.env.WEATHER_API_KEY
+
+  if (apiKey) {
+    const url = `${OPENWEATHERMAP_URL}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`
+    const data = await fetchJSONWithTimeout(url)
+    const main = data?.main || {}
+    return {
+      location: data?.name || `latitude ${latitude}, longitude ${longitude}`,
+      condition: data?.weather?.[0]?.description || null,
+      temperature: round(main.temp),
+      feelsLike: round(main.feels_like),
+      humidity: typeof main.humidity === 'number' ? main.humidity : null,
+      windSpeed: round(data?.wind?.speed),
+      windSpeedUnit: 'km/h',
+    }
+  }
+
+  const url = `${OPEN_METEO_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh`
+  const data = await fetchJSONWithTimeout(url)
+  const current = data?.current
+  if (!current) throw new Error('weather service returned no current data')
+
+  return {
+    location: `latitude ${latitude.toFixed(2)}, longitude ${longitude.toFixed(2)}`,
+    condition: WMO_WEATHER_CODES[current.weather_code] || 'Unknown conditions',
+    temperature: round(current.temperature_2m),
+    feelsLike: round(current.apparent_temperature),
+    humidity:
+      typeof current.relative_humidity_2m === 'number'
+        ? current.relative_humidity_2m
+        : null,
+    windSpeed: round(current.wind_speed_10m),
+    windSpeedUnit: data?.current_units?.wind_speed_10m || 'km/h',
+  }
+}
+
+/** Turns a weather object into a short, readable context string. */
+export function formatWeather(weather) {
+  if (!weather || typeof weather !== 'object') return null
+  const parts = []
+  if (weather.condition) parts.push(weather.condition)
+  if (typeof weather.temperature === 'number') {
+    const temp = `${weather.temperature}°C`
+    parts.push(
+      typeof weather.feelsLike === 'number'
+        ? `${temp} (feels like ${weather.feelsLike}°C)`
+        : temp,
+    )
+  }
+  if (typeof weather.humidity === 'number') parts.push(`humidity ${weather.humidity}%`)
+  if (typeof weather.windSpeed === 'number') {
+    parts.push(`wind ${weather.windSpeed} ${weather.windSpeedUnit || 'km/h'}`)
+  }
+  if (parts.length === 0) return null
+  return weather.location
+    ? `${parts.join(', ')} (${weather.location})`
+    : parts.join(', ')
+}
+
+export function buildSystemPrompt({ dateTime, weatherText, weatherUnavailable }) {
+  const lines = [
+    'You are Sun Chat Bot, a helpful AI assistant.',
+    '',
+    'You have access to the following real-time context:',
+    `- Current date/time: ${dateTime}`,
+  ]
+
+  if (weatherText) {
+    lines.push(`- Current weather: ${weatherText}`)
+    lines.push(
+      '- The weather data above was fetched live from a weather service for the given location. If the user asks about the weather, answer directly from that data.',
+    )
+  } else if (weatherUnavailable) {
+    lines.push(
+      '- Note: the user asked about the weather, but live weather data could not be retrieved for this request (no location available, or the weather service was unreachable). Tell the user you could not fetch live weather and ask them to share their city or allow location access. Do not invent weather values.',
+    )
+  }
+
+  lines.push(
+    '',
+    'Use this information to answer accurately when relevant. Do not claim you lack access to time or weather if this context is provided.',
+  )
+
+  return lines.join('\n')
 }
 
 export default async function handler(req, res) {
@@ -34,6 +218,34 @@ export default async function handler(req, res) {
     return
   }
 
+  // Build real-time context (date/time always; weather on demand).
+  const dateTime =
+    formatDateTime(body?.clientTime, body?.timeZone) ||
+    formatDateTime(new Date().toISOString()) ||
+    'unknown'
+  const wantsWeather = body?.wantsWeather === true
+  const latitude = typeof body?.latitude === 'number' ? body.latitude : null
+  const longitude = typeof body?.longitude === 'number' ? body.longitude : null
+
+  let weatherText = null
+  let weatherUnavailable = false
+  if (latitude !== null && longitude !== null) {
+    try {
+      const weather = await fetchWeather(latitude, longitude)
+      weatherText = formatWeather(weather)
+    } catch (error) {
+      console.error('[api/chat] weather fetch failed:', error)
+      weatherUnavailable = wantsWeather
+    }
+  } else if (wantsWeather) {
+    weatherUnavailable = true
+  }
+
+  const systemPrompt = buildSystemPrompt({
+    dateTime,
+    weatherText,
+    weatherUnavailable,
+  })
   const model = process.env.GROQ_MODEL || DEFAULT_MODEL
 
   let upstream
@@ -47,7 +259,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model,
-        messages,
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
         temperature: 0.7,
         max_tokens: 800,
       }),

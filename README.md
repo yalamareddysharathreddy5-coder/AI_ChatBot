@@ -11,6 +11,11 @@ with syntax highlighting.
   bubbles are styled distinctly.
 - **Groq-powered replies** — messages are sent to the Groq API through a Vercel
   serverless function; the sun-loader shows while the reply is generated.
+- **Real-time context** — every request carries your current local date/time, so
+  the assistant always knows what time it is.
+- **Live weather** — ask a weather question and (after allowing browser location
+  access) the current weather for your location is fetched live and passed to the
+  assistant, so it answers from real data instead of guessing.
 - **Emoji decorator** — assistant replies get a light emoji touch: a relevant
   emoji before section headings (💡 tips, ✅ steps, ⚠️ notes, 📌 summaries) and a
   matching opener emoji, while code blocks and body paragraphs stay clean.
@@ -54,6 +59,33 @@ npm install
 Assistant replies come from the Groq API. The API key is read **on the server
 only** (in `api/chat.js`) and never ships to the browser.
 
+### Real-time context
+
+Before each Groq request, the server builds a system prompt with real-time
+context so the assistant can answer time and weather questions accurately:
+
+- **Date/time** — always included. The browser sends the current timestamp and
+  your IANA timezone, formatted like
+  `Current date/time: Thursday, 18 September 2026, 11:45 PM IST`.
+- **Weather** — fetched on demand. When a weather-related message is detected,
+  the browser requests your location (browser permission prompt) with the
+  [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API)
+  and the server fetches live conditions from
+  [Open-Meteo](https://open-meteo.com) — **free and no API key required**.
+  The data (temperature, condition, humidity, wind, etc.) is injected into the
+  system prompt. If no location is available (permission denied or geolocation
+  unsupported), the assistant politely asks for your city instead of guessing.
+
+If the weather fetch fails, non-weather questions are unaffected; the assistant
+only mentions the failure if you specifically asked about the weather.
+
+### Using a keyed weather provider (optional)
+
+Open-Meteo needs no key, but you can plug in [OpenWeatherMap](https://openweathermap.org/api)
+(a free API key is available there): set a `WEATHER_API_KEY` environment
+variable server-side and the server will call OpenWeatherMap instead. The key is
+never hardcoded or shipped to the browser.
+
 ### Local development
 
 Create a `.env` file in the project root (it is git-ignored; copy the shape from
@@ -61,7 +93,13 @@ Create a `.env` file in the project root (it is git-ignored; copy the shape from
 
 ```
 GROQ_API_KEY=your_groq_api_key_here
+# optional (defaults to Open-Meteo, no key needed):
+# WEATHER_API_KEY=your_openweathermap_api_key_here
 ```
+
+Weather uses Open-Meteo out of the box, so no extra setup is required to get
+live weather. If you set `WEATHER_API_KEY` (OpenWeatherMap), the server uses it
+instead.
 
 Vercel CLI loads `.env` automatically and runs both the Vite frontend and the
 serverless functions:
@@ -86,7 +124,9 @@ Set the environment variable in the Vercel dashboard:
 
 1. In your project, go to **Settings → Environment Variables**.
 2. Add a variable named `GROQ_API_KEY` with your key as the value (add
-   `GROQ_MODEL` too if you want a specific model).
+   `GROQ_MODEL` too if you want a specific model). Weather works out of the box
+   via Open-Meteo (no key); if you prefer OpenWeatherMap, add `WEATHER_API_KEY`
+   with a key from <https://openweathermap.org/api>.
 3. Save, then trigger a redeploy (**Deployments → ⋯ → Redeploy**).
 
 The key stays in Vercel's environment — it is never committed to the
@@ -175,6 +215,8 @@ vercel --prod                 # production deployment
 
 - All chat state is client-side and stored under the `localStorage` keys
   `sun-chat-bot-chats` and `sun-chat-bot-projects`.
-- The only network call is `POST /api/chat`, served by a Vercel serverless
+- The main network call is `POST /api/chat`, served by a Vercel serverless
   function (`api/chat.js`). The Groq API key lives in the server environment,
-  never in the browser bundle.
+  never in the browser bundle. For weather questions, the server additionally
+  calls Open-Meteo (default, keyless) or OpenWeatherMap (if `WEATHER_API_KEY` is
+  set) — always from the server, so no weather API key reaches the client.
