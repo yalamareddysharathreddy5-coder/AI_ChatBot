@@ -50,6 +50,23 @@ function isLocationQuery(text) {
   return LOCATION_QUERY_RE.test(String(text || ''))
 }
 
+const IMAGE_ACTION_WORDS =
+  'generate|create|make|draw|paint|render|produce|design|show|send|need|want'
+const IMAGE_NOUN_WORDS =
+  'image|picture|photo|photograph|illustration|artwork|logo|poster|wallpaper|avatar|drawing|painting|meme|sketch|cartoon|portrait|infographic|banner|mascot|icon|art'
+const IMAGE_QUERY_RE = new RegExp(
+  `\\b(?:${IMAGE_ACTION_WORDS})\\b.{0,60}?\\b(?:${IMAGE_NOUN_WORDS})\\b|\\b(?:${IMAGE_NOUN_WORDS})\\b.{0,60}?\\b(?:${IMAGE_ACTION_WORDS})\\b|\\b(?:generate|draw|paint|render|sketch|illustrate)\\b(?=\\s+(?:(?:a |an |the |some |me |us |it ){0,2})\\w{3,})`,
+  'i'
+)
+const IMAGE_QUERY_EXCLUSION_RE =
+  /\b(conclusion|conclusions|parallel|parallels|distinction|inference|attention to|ire|a blank)\b/i
+
+function isImageQuery(text) {
+  const value = String(text || '')
+  if (IMAGE_QUERY_EXCLUSION_RE.test(value)) return false
+  return IMAGE_QUERY_RE.test(value)
+}
+
 function getCoordinates(options = {}) {
   return new Promise((resolve) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -265,6 +282,38 @@ function Clock({ theme }) {
   )
 }
 
+function ImageMessage({ message }) {
+  const [status, setStatus] = useState('loading')
+  const { imageUrl, prompt } = message
+
+  return (
+    <div className="bubble image-bubble">
+      <div className="image-frame">
+        {status !== 'error' && (
+          <img
+            className={`generated-image${status === 'loaded' ? ' loaded' : ''}`}
+            src={imageUrl}
+            alt={prompt || 'Generated image'}
+            referrerPolicy="no-referrer"
+            onLoad={() => setStatus('loaded')}
+            onError={() => setStatus('error')}
+          />
+        )}
+        {status === 'loading' && <div className="image-skeleton" aria-hidden="true" />}
+        {status === 'error' && (
+          <div className="image-fallback">
+            <p>The image could not be loaded right now.</p>
+            <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+              Open it in a new tab
+            </a>
+          </div>
+        )}
+      </div>
+      {prompt ? <p className="image-caption">{prompt}</p> : null}
+    </div>
+  )
+}
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarView, setSidebarView] = useState('chats')
@@ -399,6 +448,7 @@ function App() {
 
       const wantsWeather = isWeatherQuery(text)
       const wantsLocation = isLocationQuery(text)
+      const wantsImage = isImageQuery(text)
 
       const stored = locationRef.current
       let coords =
@@ -433,6 +483,7 @@ function App() {
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           wantsWeather,
           wantsLocation,
+          wantsImage,
           latitude: coords?.latitude ?? null,
           longitude: coords?.longitude ?? null,
           locationName: place,
@@ -452,11 +503,22 @@ function App() {
         saveStoredLocation(loc)
       }
 
+      const isImage = response.ok && data?.type === 'image'
+
       const content = response.ok
-        ? decorateReply(data?.content || 'No response returned.')
+        ? isImage
+          ? data?.prompt
+            ? `Generated image: ${data.prompt}`
+            : 'Generated image.'
+          : decorateReply(data?.content || 'No response returned.')
         : `> ⚠️ **Sun Chat Bot could not get a reply.**\n\n${data?.error || `The request failed with status ${response.status}.`}`
 
       const assistantMsg = { id: ++idRef.current, role: 'assistant', content }
+      if (isImage) {
+        assistantMsg.contentType = 'image'
+        assistantMsg.imageUrl = data.imageUrl
+        assistantMsg.prompt = data.prompt
+      }
       const updated = [...messagesRef.current, assistantMsg]
       updateMessages(updated)
       persistChat(updated, chatId)
@@ -867,7 +929,9 @@ function App() {
                   {message.role === 'assistant' && (
                     <span className="message-label">Sun Chat Bot</span>
                   )}
-                  {message.role === 'assistant' ? (
+                  {message.role === 'assistant' && message.contentType === 'image' ? (
+                    <ImageMessage message={message} />
+                  ) : message.role === 'assistant' ? (
                     <div className="bubble">
                       <Markdown content={message.content} />
                     </div>

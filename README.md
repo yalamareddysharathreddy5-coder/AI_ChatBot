@@ -11,6 +11,10 @@ with syntax highlighting.
   bubbles are styled distinctly.
 - **Groq-powered replies** — messages are sent to the Groq API through a Vercel
   serverless function; the sun-loader shows while the reply is generated.
+- **Image generation** — asking for an image (e.g. *"generate an image of a
+  sunset over mountains"*) returns a real, AI-generated picture rendered inline
+  in the chat bubble via [Pollinations.ai](https://pollinations.ai) — **free, no
+  API key**.
 - **Real-time context** — every request carries your current local date/time, so
   the assistant always knows what time it is.
 - **Live weather** — ask a weather question and (after allowing browser location
@@ -92,6 +96,28 @@ context so the assistant can answer time and weather questions accurately:
 
 If the weather fetch fails, non-weather questions are unaffected; the assistant
 only mentions the failure if you specifically asked about the weather.
+
+### Image generation
+
+When a message looks like an image request (a keyword check similar to weather
+detection — e.g. *generate/draw/make … an image/picture/photo*), the server skips
+Groq entirely and builds a direct image URL from the message text:
+
+```
+https://image.pollinations.ai/prompt/{encoded-prompt}?width=1024&height=1024&nologo=true&seed=…
+```
+
+That URL is returned to the browser, which loads the image like any `<img>`:
+a shimmering placeholder shows while it generates/loads, then the picture fades
+in. If the image fails to load, a fallback message with an "Open it in a new
+tab" link appears instead. Image messages are persisted in `localStorage` the
+same way as text (with their `imageUrl` + `prompt`), so they reload when you
+revisit a past chat.
+
+Normal text requests are completely unaffected — they keep going to Groq. Because
+Pollinations needs no API key, image generation works with **zero extra
+setup**. (To use a different provider instead, swap `buildImageUrl()` in
+`api/chat.js`.)
 
 The browser's Geolocation API needs a **secure context**: `https://` on your
 domain or `http://localhost`. If permission is denied, nothing breaks — weather
@@ -251,3 +277,7 @@ vercel --prod                 # production deployment
   The assistant is instructed not to invent real business names, addresses,
   phone numbers, or opening hours for "nearby" questions — there is no places
   directory connected.
+- Image requests skip the text API: the server turns the user's message into a
+  Pollinations.ai image URL (free, keyless) and the client renders it inline
+  with a loading skeleton and an error fallback. No image-generation key is ever
+  needed or stored.

@@ -40,6 +40,22 @@ function send(res, status, body) {
   res.status(status).json(body)
 }
 
+const POLLINATIONS_BASE_URL = 'https://image.pollinations.ai/prompt'
+
+/**
+ * Builds a direct image URL for a prompt using Pollinations.ai — free, no API
+ * key required. The URL points straight at the generated image (the browser
+ * loads it the same way it loads any <img>).
+ */
+export function buildImageUrl(prompt) {
+  const url = new URL(`${POLLINATIONS_BASE_URL}/${encodeURIComponent(prompt)}`)
+  url.searchParams.set('width', '1024')
+  url.searchParams.set('height', '1024')
+  url.searchParams.set('nologo', 'true')
+  url.searchParams.set('seed', String(Math.floor(Math.random() * 2147483647)))
+  return url.toString()
+}
+
 function round(value, decimals = 1) {
   return typeof value === 'number' && Number.isFinite(value)
     ? Number(value.toFixed(decimals))
@@ -228,6 +244,21 @@ export default async function handler(req, res) {
   if (!Array.isArray(messages) || messages.length === 0) {
     send(res, 400, { error: '`messages` must be a non-empty array.' })
     return
+  }
+
+  // Image requests are routed straight to Pollinations (free, keyless) using the
+  // latest user message as the prompt; the text/Groq path is untouched otherwise.
+  if (body?.wantsImage === true) {
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
+    const prompt = lastUserMessage?.content?.trim()
+    if (prompt) {
+      send(res, 200, {
+        type: 'image',
+        imageUrl: buildImageUrl(prompt),
+        prompt,
+      })
+      return
+    }
   }
 
   const apiKey = process.env.GROQ_API_KEY
