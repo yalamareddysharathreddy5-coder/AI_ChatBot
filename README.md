@@ -100,24 +100,26 @@ only mentions the failure if you specifically asked about the weather.
 ### Image generation
 
 When a message looks like an image request (a keyword check in a shared module,
-`lib/image.js`, used by both the client and the server — e.g.
-*generate/draw/make … an image/picture/photo*), an image URL is built from the
-message text and Pollinations is used directly. The **Groq text API is never
-called for image requests**:
+`lib/image.js`, used by both the client and the server — catch phrases include
+*image of*, *picture of*, *photo of*, *generate an image*, *show me a picture*,
+*give/get me a picture*, and bare *draw/generate …* followed by a subject; all
+case-insensitive), an image URL is built from the message text and Pollinations
+is used directly. The **Groq text API is never called for image requests**:
 
 ```
 https://image.pollinations.ai/prompt/{encoded-prompt}?width=1024&height=1024&nologo=true&seed=…
 ```
 
-The image URL is built client-side (so it works even in plain `npm run dev`
-with no `/api/chat`), and the browser loads it like any `<img>`: a shimmering
-placeholder shows while it generates/loads, then the picture fades in. If the
-image fails to load, a fallback message with an "Open it in a new tab" link
-appears instead. Image messages are persisted in `localStorage` the same way as
-text (with their `imageUrl` + `prompt`), so they reload when you revisit a past
-chat. As a second line of defense, `api/chat.js` also re-checks the message with
-the same detector, so a clear image request can never be handed to the Groq text
-model.
+The prompt is the *subject* of the request, extracted so it reads cleanly —
+"give me image of lion" becomes a prompt of just "lion". The image URL is built
+client-side (so it works even in plain `npm run dev` with no `/api/chat`), and
+the browser loads it like any `<img>`: a shimmering placeholder shows while it
+generates/loads, then the picture fades in. If the image fails to load, a
+fallback message with an "Open it in a new tab" link appears instead. Image
+messages are persisted in `localStorage` the same way as text (with their
+`imageUrl` + `prompt`), so they reload when you revisit a past chat. As a second
+line of defense, `api/chat.js` also re-checks the message with the same
+detector, so a clear image request can never be handed to the Groq text model.
 
 Normal text requests are completely unaffected — they keep going to Groq. Because
 Pollinations needs no API key, image generation works with **zero extra

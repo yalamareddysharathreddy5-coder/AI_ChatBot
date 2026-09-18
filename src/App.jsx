@@ -3,7 +3,7 @@ import './App.css'
 import Markdown from './Markdown.jsx'
 import { decorateReply } from './emoji.js'
 import { getMockReply } from './mock.js'
-import { buildImageUrl, isImageQuery } from '../lib/image.js'
+import { buildImageUrl, extractImageSubject, isImageQuery } from '../lib/image.js'
 
 const CHATS_KEY = 'sun-chat-bot-chats'
 const PROJECTS_KEY = 'sun-chat-bot-projects'
@@ -438,24 +438,28 @@ function App() {
     try {
       if (wantsImage) {
         console.log(
-          '[Sun Chat Bot] image intent detected → skipping Groq text API:',
+          '[Sun Chat Bot] IMAGE INTENT DETECTED → skipping Groq text API:',
           text,
         )
-        const imageUrl = buildImageUrl(text)
+        const subject = extractImageSubject(text)
+        const imageUrl = buildImageUrl(subject)
+        console.log('[Sun Chat Bot] image subject:', subject)
         console.log('[Sun Chat Bot] image URL built:', imageUrl)
         const assistantMsg = {
           id: ++idRef.current,
           role: 'assistant',
           contentType: 'image',
           imageUrl,
-          prompt: text,
-          content: `Generated image: ${text}`,
+          prompt: subject,
+          content: `Generated image: ${subject}`,
         }
         const updated = [...messagesRef.current, assistantMsg]
         updateMessages(updated)
         persistChat(updated, chatId)
         return
       }
+
+      console.log('[Sun Chat Bot] TEXT INTENT → sending to Groq:', text)
 
       const conversation = newMessages.map(({ role, content }) => ({
         role,

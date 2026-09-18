@@ -1,5 +1,5 @@
 import { reverseGeocode } from '../lib/geocode.js'
-import { buildImageUrl, isImageQuery } from '../lib/image.js'
+import { buildImageUrl, extractImageSubject, isImageQuery } from '../lib/image.js'
 
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast'
@@ -249,9 +249,10 @@ export default async function handler(req, res) {
       ') → routing to Pollinations for prompt:',
       prompt,
     )
-    const imageUrl = buildImageUrl(prompt)
+    const subject = extractImageSubject(prompt)
+    const imageUrl = buildImageUrl(subject)
     console.log('[api/chat] Pollinations image URL:', imageUrl)
-    send(res, 200, { type: 'image', imageUrl, prompt })
+    send(res, 200, { type: 'image', imageUrl, prompt: subject })
     return
   }
 
