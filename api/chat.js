@@ -1,4 +1,5 @@
 import { reverseGeocode } from '../lib/geocode.js'
+import { buildImageUrl, isImageQuery } from '../lib/image.js'
 
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast'
@@ -38,22 +39,6 @@ const WMO_WEATHER_CODES = {
 
 function send(res, status, body) {
   res.status(status).json(body)
-}
-
-const POLLINATIONS_BASE_URL = 'https://image.pollinations.ai/prompt'
-
-/**
- * Builds a direct image URL for a prompt using Pollinations.ai — free, no API
- * key required. The URL points straight at the generated image (the browser
- * loads it the same way it loads any <img>).
- */
-export function buildImageUrl(prompt) {
-  const url = new URL(`${POLLINATIONS_BASE_URL}/${encodeURIComponent(prompt)}`)
-  url.searchParams.set('width', '1024')
-  url.searchParams.set('height', '1024')
-  url.searchParams.set('nologo', 'true')
-  url.searchParams.set('seed', String(Math.floor(Math.random() * 2147483647)))
-  return url.toString()
 }
 
 function round(value, decimals = 1) {
@@ -248,17 +233,26 @@ export default async function handler(req, res) {
 
   // Image requests are routed straight to Pollinations (free, keyless) using the
   // latest user message as the prompt; the text/Groq path is untouched otherwise.
-  if (body?.wantsImage === true) {
-    const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
-    const prompt = lastUserMessage?.content?.trim()
-    if (prompt) {
-      send(res, 200, {
-        type: 'image',
-        imageUrl: buildImageUrl(prompt),
-        prompt,
-      })
-      return
-    }
+  // Detection happens here on the server too (not just the client flag), so a
+  // clear image request can never reach the Groq text API.
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
+  const prompt = lastUserMessage?.content?.trim()
+  const clientWantsImage = body?.wantsImage === true
+  const serverDetectsImage = !!prompt && isImageQuery(prompt)
+
+  if ((clientWantsImage || serverDetectsImage) && prompt) {
+    console.log(
+      '[api/chat] image intent detected (client flag:',
+      clientWantsImage,
+      '/ server keyword check:',
+      serverDetectsImage,
+      ') → routing to Pollinations for prompt:',
+      prompt,
+    )
+    const imageUrl = buildImageUrl(prompt)
+    console.log('[api/chat] Pollinations image URL:', imageUrl)
+    send(res, 200, { type: 'image', imageUrl, prompt })
+    return
   }
 
   const apiKey = process.env.GROQ_API_KEY

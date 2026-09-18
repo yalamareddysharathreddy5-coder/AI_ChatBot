@@ -3,6 +3,7 @@ import './App.css'
 import Markdown from './Markdown.jsx'
 import { decorateReply } from './emoji.js'
 import { getMockReply } from './mock.js'
+import { buildImageUrl, isImageQuery } from '../lib/image.js'
 
 const CHATS_KEY = 'sun-chat-bot-chats'
 const PROJECTS_KEY = 'sun-chat-bot-projects'
@@ -48,23 +49,6 @@ const LOCATION_QUERY_RE =
 
 function isLocationQuery(text) {
   return LOCATION_QUERY_RE.test(String(text || ''))
-}
-
-const IMAGE_ACTION_WORDS =
-  'generate|create|make|draw|paint|render|produce|design|show|send|need|want'
-const IMAGE_NOUN_WORDS =
-  'image|picture|photo|photograph|illustration|artwork|logo|poster|wallpaper|avatar|drawing|painting|meme|sketch|cartoon|portrait|infographic|banner|mascot|icon|art'
-const IMAGE_QUERY_RE = new RegExp(
-  `\\b(?:${IMAGE_ACTION_WORDS})\\b.{0,60}?\\b(?:${IMAGE_NOUN_WORDS})\\b|\\b(?:${IMAGE_NOUN_WORDS})\\b.{0,60}?\\b(?:${IMAGE_ACTION_WORDS})\\b|\\b(?:generate|draw|paint|render|sketch|illustrate)\\b(?=\\s+(?:(?:a |an |the |some |me |us |it ){0,2})\\w{3,})`,
-  'i'
-)
-const IMAGE_QUERY_EXCLUSION_RE =
-  /\b(conclusion|conclusions|parallel|parallels|distinction|inference|attention to|ire|a blank)\b/i
-
-function isImageQuery(text) {
-  const value = String(text || '')
-  if (IMAGE_QUERY_EXCLUSION_RE.test(value)) return false
-  return IMAGE_QUERY_RE.test(value)
 }
 
 function getCoordinates(options = {}) {
@@ -295,8 +279,14 @@ function ImageMessage({ message }) {
             src={imageUrl}
             alt={prompt || 'Generated image'}
             referrerPolicy="no-referrer"
-            onLoad={() => setStatus('loaded')}
-            onError={() => setStatus('error')}
+            onLoad={() => {
+              console.log('[Sun Chat Bot] image loaded:', imageUrl)
+              setStatus('loaded')
+            }}
+            onError={() => {
+              console.error('[Sun Chat Bot] image failed to load:', imageUrl)
+              setStatus('error')
+            }}
           />
         )}
         {status === 'loading' && <div className="image-skeleton" aria-hidden="true" />}
@@ -428,6 +418,11 @@ function App() {
     const text = input.trim()
     if (!text) return
 
+    // Detect image intent FIRST — before any Groq call. Image requests never
+    // reach the text API: the image URL is built right here (Pollinations needs
+    // no key), so it works even without a backend.
+    const wantsImage = isImageQuery(text)
+
     const requestId = ++requestRef.current
 
     const userMsg = { id: ++idRef.current, role: 'user', content: text }
@@ -441,6 +436,27 @@ function App() {
 
     setIsThinking(true)
     try {
+      if (wantsImage) {
+        console.log(
+          '[Sun Chat Bot] image intent detected → skipping Groq text API:',
+          text,
+        )
+        const imageUrl = buildImageUrl(text)
+        console.log('[Sun Chat Bot] image URL built:', imageUrl)
+        const assistantMsg = {
+          id: ++idRef.current,
+          role: 'assistant',
+          contentType: 'image',
+          imageUrl,
+          prompt: text,
+          content: `Generated image: ${text}`,
+        }
+        const updated = [...messagesRef.current, assistantMsg]
+        updateMessages(updated)
+        persistChat(updated, chatId)
+        return
+      }
+
       const conversation = newMessages.map(({ role, content }) => ({
         role,
         content,
@@ -448,7 +464,6 @@ function App() {
 
       const wantsWeather = isWeatherQuery(text)
       const wantsLocation = isLocationQuery(text)
-      const wantsImage = isImageQuery(text)
 
       const stored = locationRef.current
       let coords =
@@ -524,11 +539,20 @@ function App() {
       persistChat(updated, chatId)
     } catch {
       if (requestRef.current !== requestId) return
-      const assistantMsg = {
-        id: ++idRef.current,
-        role: 'assistant',
-        content: decorateReply(getMockReply(text)),
-      }
+      const assistantMsg = wantsImage
+        ? {
+            id: ++idRef.current,
+            role: 'assistant',
+            contentType: 'image',
+            imageUrl: buildImageUrl(text),
+            prompt: text,
+            content: `Generated image: ${text}`,
+          }
+        : {
+            id: ++idRef.current,
+            role: 'assistant',
+            content: decorateReply(getMockReply(text)),
+          }
       const updated = [...messagesRef.current, assistantMsg]
       updateMessages(updated)
       persistChat(updated, chatId)

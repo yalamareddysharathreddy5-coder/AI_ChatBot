@@ -99,25 +99,30 @@ only mentions the failure if you specifically asked about the weather.
 
 ### Image generation
 
-When a message looks like an image request (a keyword check similar to weather
-detection — e.g. *generate/draw/make … an image/picture/photo*), the server skips
-Groq entirely and builds a direct image URL from the message text:
+When a message looks like an image request (a keyword check in a shared module,
+`lib/image.js`, used by both the client and the server — e.g.
+*generate/draw/make … an image/picture/photo*), an image URL is built from the
+message text and Pollinations is used directly. The **Groq text API is never
+called for image requests**:
 
 ```
 https://image.pollinations.ai/prompt/{encoded-prompt}?width=1024&height=1024&nologo=true&seed=…
 ```
 
-That URL is returned to the browser, which loads the image like any `<img>`:
-a shimmering placeholder shows while it generates/loads, then the picture fades
-in. If the image fails to load, a fallback message with an "Open it in a new
-tab" link appears instead. Image messages are persisted in `localStorage` the
-same way as text (with their `imageUrl` + `prompt`), so they reload when you
-revisit a past chat.
+The image URL is built client-side (so it works even in plain `npm run dev`
+with no `/api/chat`), and the browser loads it like any `<img>`: a shimmering
+placeholder shows while it generates/loads, then the picture fades in. If the
+image fails to load, a fallback message with an "Open it in a new tab" link
+appears instead. Image messages are persisted in `localStorage` the same way as
+text (with their `imageUrl` + `prompt`), so they reload when you revisit a past
+chat. As a second line of defense, `api/chat.js` also re-checks the message with
+the same detector, so a clear image request can never be handed to the Groq text
+model.
 
 Normal text requests are completely unaffected — they keep going to Groq. Because
 Pollinations needs no API key, image generation works with **zero extra
 setup**. (To use a different provider instead, swap `buildImageUrl()` in
-`api/chat.js`.)
+`lib/image.js`.)
 
 The browser's Geolocation API needs a **secure context**: `https://` on your
 domain or `http://localhost`. If permission is denied, nothing breaks — weather
@@ -249,7 +254,8 @@ vercel --prod                 # production deployment
 │   ├── chat.js         # Vercel serverless function proxying to Groq
 │   └── location.js     # Reverse-geocodes shared coordinates via Nominatim
 ├── lib/
-│   └── geocode.js      # Shared Nominatim reverse-geocoding helper
+│   ├── geocode.js      # Shared Nominatim reverse-geocoding helper
+│   └── image.js        # Image-intent detection + Pollinations URL builder
 ├── public/             # Static assets served as-is (favicon, icons)
 └── src/
     ├── main.jsx        # React root
