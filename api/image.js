@@ -1,4 +1,4 @@
-// NovaChat - Vercel Serverless Function for Image Search
+// Jarvixss Chat - Vercel Serverless Function for Image Search
 // Sources: Unsplash (if UNSPLASH_ACCESS_KEY set), else Wikimedia Commons/Wikipedia
 
 const WIKIMEDIA_SEARCH_URL = 'https://commons.wikimedia.org/w/api.php';

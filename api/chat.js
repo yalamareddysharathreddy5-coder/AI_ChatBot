@@ -1,4 +1,4 @@
-// NovaChat - Vercel Serverless Function
+// Jarvixss Chat - Vercel Serverless Function
 // Primary provider: Groq Cloud (OpenAI-compatible API)
 // Optional fallback: Google Gemini
 

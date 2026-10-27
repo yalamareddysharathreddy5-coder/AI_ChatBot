@@ -1,4 +1,4 @@
-// NovaChat - localStorage Helpers
+// Jarvixss Chat - localStorage Helpers
 // All localStorage operations with error handling and data compression
 
 const STORAGE_KEYS = {

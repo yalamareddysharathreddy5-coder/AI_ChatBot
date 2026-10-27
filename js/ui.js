@@ -1,4 +1,4 @@
-// NovaChat - UI Helpers
+// Jarvixss Chat - UI Helpers
 // Rendering, toasts, modals, and DOM manipulation
 
 // Create toast notification

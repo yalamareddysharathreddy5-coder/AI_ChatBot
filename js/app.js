@@ -1,4 +1,4 @@
-// NovaChat - Main Application Logic
+// Jarvixss Chat - Main Application Logic
 // Handles chat, UI interactions, API calls, and all features
 
 import * as storage from './storage.js';
