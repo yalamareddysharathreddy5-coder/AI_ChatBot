@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaChat - AI Chatbot</title>
+    <title>Jarvixss Chat - AI Chatbot</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -21,8 +21,9 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <span>✨</span>
-                    <span>NovaChat</span>
+                    <span class="logo-img-wrap"><img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="sidebar-logo-img" onerror="this.style.display='none'; this.parentElement.querySelector('.logo-emoji').style.display='inline'"></span>
+                    <span class="logo-emoji" style="display:none">✨</span>
+                    <span>Jarvixss Chat</span>
                 </div>
                 <button class="new-chat-btn ripple" id="newChatBtn">
                     <span>➕</span>
@@ -60,8 +61,11 @@
             <div class="chat-messages" id="chatMessages">
                 <!-- Welcome Screen -->
                 <div class="welcome-screen" id="welcomeScreen">
-                    <div class="welcome-logo">✨</div>
-                    <h1 class="welcome-title">Welcome to NovaChat</h1>
+                <div class="welcome-logo-wrap">
+                    <img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="welcome-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="welcome-logo" style="display:none">✨</div>
+                </div>
+                <h1 class="welcome-title">Welcome to Jarvixss Chat</h1>
                     <p class="welcome-subtitle">Your intelligent AI companion for any conversation</p>
                     
                     <div class="suggested-prompts">
@@ -77,10 +81,14 @@
                             <strong>📚 Help me study for exams</strong><br>
                             <small>Create personalized study plans</small>
                         </button>
-                        <button class="suggest-prompt-card" data-prompt="What are the latest tech trends in 2026?">
-                            <strong>🚀 Latest tech trends</strong><br>
-                            <small>Stay updated with technology</small>
-                        </button>
+                    <button class="suggest-prompt-card" data-prompt="What are the latest tech trends in 2026?">
+                        <strong>🚀 Latest tech trends</strong><br>
+                        <small>Stay updated with technology</small>
+                    </button>
+                    <button class="suggest-prompt-card" data-prompt="Who built you?">
+                        <strong>👤 Who created you?</strong><br>
+                        <small>Learn about the creator</small>
+                    </button>
                     </div>
                 </div>
             </div>
@@ -120,6 +128,20 @@
                 <button class="modal-close" id="closeSettingsBtn" aria-label="Close settings">×</button>
             </div>
             <div class="modal-body">
+                <div class="settings-group settings-about">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <div class="about-logo-wrap">
+                            <img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="about-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                            <span style="display:none">✨</span>
+                        </div>
+                        <div>
+                            <div style="font-weight:600;">Jarvixss Chat</div>
+                            <div style="opacity:0.8;font-size:0.9rem;">Created by Sharath</div>
+                            <div style="opacity:0.7;font-size:0.85rem;">App version: 1.0.0</div>
+                            <div style="margin-top:0.25rem;"><a href="https://github.com/yalamareddysharathreddy5-coder/AI_ChatBot.git" target="_blank" rel="noopener noreferrer">GitHub Repo</a></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="settings-group">
                     <label for="personalitySelect">AI Personality</label>
                     <select id="personalitySelect">
@@ -183,6 +205,8 @@
 
     <!-- Hidden file input -->
     <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+    <footer class="app-footer">Built with ❤️ by Sharath</footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script type="module" src="js/app.js"></script>
