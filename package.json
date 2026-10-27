@@ -1,7 +1,7 @@
 {
-  "name": "novachat",
+  "name": "jarvixss-chat",
   "version": "1.0.0",
-  "description": "A complete, beginner-friendly AI chatbot web app called NovaChat using plain HTML, CSS and vanilla JavaScript",
+  "description": "A complete, beginner-friendly AI chatbot web app called Jarvixss Chat using plain HTML, CSS and vanilla JavaScript",
   "type": "module",
   "scripts": {
     "dev": "node server.js",

@@ -219,8 +219,8 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, () => {
-  console.log(`NovaChat is running at http://localhost:${port}`);
-  if (!process.env.AI_API_KEY) {
-    console.log('AI_API_KEY is not set - running in demo mode.');
+  console.log(`Jarvixss Chat is running at http://localhost:${port}`);
+  if (!process.env.GROQ_API_KEY && !process.env.AI_API_KEY) {
+    console.log('No API keys set - running in demo mode.');
   }
 });
