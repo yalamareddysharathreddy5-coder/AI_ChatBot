@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaChat - AI Chatbot</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+    <!-- Animated Background Orbs -->
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span>✨</span>
+                    <span>NovaChat</span>
+                </div>
+                <button class="new-chat-btn ripple" id="newChatBtn">
+                    <span>➕</span>
+                    <span>New Chat</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-search">
+                <input type="text" id="sidebarSearch" placeholder="Search chats..." aria-label="Search chats">
+            </div>
+            
+            <div class="chat-sessions" id="chatSessions">
+                <!-- Chat sessions will be dynamically added -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="chat-header">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+                <div class="header-title" id="currentChatName">New Chat</div>
+                <div class="header-actions">
+                    <button class="header-btn ripple" id="newChatHeaderBtn" aria-label="New chat">➕ New</button>
+                    <button class="header-btn ripple" id="clearChatBtn" aria-label="Clear chat">🗑️ Clear</button>
+                    <button class="header-btn ripple" id="regenerateBtn" style="display:none;" aria-label="Regenerate response">🔄 Regenerate</button>
+                    <button class="header-btn ripple" id="stopBtn" style="display:none;" aria-label="Stop generating">⏹️ Stop</button>
+                    <button class="header-btn ripple" id="themeToggleBtn" aria-label="Toggle theme">🌓 Theme</button>
+                    <button class="header-btn ripple" id="settingsBtn" aria-label="Settings">⚙️ Settings</button>
+                </div>
+            </header>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome Screen -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-logo">✨</div>
+                    <h1 class="welcome-title">Welcome to NovaChat</h1>
+                    <p class="welcome-subtitle">Your intelligent AI companion for any conversation</p>
+                    
+                    <div class="suggested-prompts">
+                        <button class="suggest-prompt-card" data-prompt="Explain quantum computing in simple terms">
+                            <strong>⚛️ Explain quantum computing</strong><br>
+                            <small>Learn complex topics easily</small>
+                        </button>
+                        <button class="suggest-prompt-card" data-prompt="Plan a trip to Goa with budget and itinerary">
+                            <strong>🏖️ Plan a trip to Goa</strong><br>
+                            <small>Get detailed travel plans</small>
+                        </button>
+                        <button class="suggest-prompt-card" data-prompt="Help me study for exams with a study plan">
+                            <strong>📚 Help me study for exams</strong><br>
+                            <small>Create personalized study plans</small>
+                        </button>
+                        <button class="suggest-prompt-card" data-prompt="What are the latest tech trends in 2026?">
+                            <strong>🚀 Latest tech trends</strong><br>
+                            <small>Stay updated with technology</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <!-- Image Preview -->
+                <div class="image-preview-container" id="imagePreviewContainer"></div>
+                
+                <div class="input-row">
+                    <div class="input-controls">
+                        <button class="input-control-btn ripple" id="uploadImageBtn" title="Upload Image" aria-label="Upload image">🖼️</button>
+                        <button class="input-control-btn ripple" id="voiceInputBtn" title="Voice Input" aria-label="Voice input">🎤</button>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Type your message... (Shift+Enter for new line)" 
+                            rows="1"
+                            aria-label="Message input"
+                        ></textarea>
+                    </div>
+                    
+                    <button class="send-btn ripple" id="sendBtn" aria-label="Send message">Send ➤</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="modal-close" id="closeSettingsBtn" aria-label="Close settings">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label for="personalitySelect">AI Personality</label>
+                    <select id="personalitySelect">
+                        <option value="friendly">Friendly</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="professional">Professional</option>
+                        <option value="funny">Funny</option>
+                    </select>
+                </div>
+                
+                <div class="settings-group">
+                    <label for="fontSizeRange">Font Size: <span id="fontSizeValue">16</span>px</label>
+                    <input type="range" id="fontSizeRange" min="12" max="20" value="16" oninput="document.getElementById('fontSizeValue').textContent = this.value">
+                </div>
+                
+                <div class="settings-group">
+                    <label for="accentColorSelect">Accent Color</label>
+                    <select id="accentColorSelect">
+                        <option value="#6366f1">Indigo</option>
+                        <option value="#a855f7">Purple</option>
+                        <option value="#ec4899">Pink</option>
+                        <option value="#10b981">Green</option>
+                        <option value="#f59e0b">Orange</option>
+                    </select>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="animationsToggle" checked>
+                        <label for="animationsToggle">Enable Animations</label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="soundsToggle">
+                        <label for="soundsToggle">Enable Sounds</label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label>Export Chat</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="modal-btn" id="exportTxtBtn">📄 Download as TXT</button>
+                        <button class="modal-btn" id="exportJsonBtn">📋 Download as JSON</button>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <button class="modal-btn" style="background: var(--error); color: white; border: none;" id="clearAllDataBtn">⚠️ Clear All Data</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" id="saveSettingsBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
