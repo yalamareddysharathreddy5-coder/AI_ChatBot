@@ -3,9 +3,10 @@
 // Optional fallback: Google Gemini
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_TEXT_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+// Current Groq models (update as needed from https://console.groq.com/docs/models)
+const GROQ_TEXT_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 const GROQ_VISION_MODEL =
-  process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
+  process.env.GROQ_VISION_MODEL || 'llama-3.2-11b-vision-preview';
 
 const GEMINI_MODELS = [
   ...new Set(
@@ -123,7 +124,17 @@ async function callGroq({ apiKey, messages, image, personality }) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.error?.message || `Groq API returned ${response.status}`);
+    const errMsg = data.error?.message || data.message || `Groq API returned ${response.status}`;
+    if (response.status === 401) {
+      throw new Error('Invalid Groq API key. Please check your GROQ_API_KEY.');
+    }
+    if (response.status === 429) {
+      throw new Error('Groq rate limit exceeded. Please try again in a moment.');
+    }
+    if (response.status === 404 || /model/i.test(errMsg)) {
+      throw new Error(`Groq model not found or unavailable: ${model}. ${errMsg}`);
+    }
+    throw new Error(errMsg);
   }
 
   const content = data.choices?.[0]?.message?.content;
@@ -288,7 +299,14 @@ Important rules:
 - If you are unsure about something, say so clearly.
 - Be concise but thorough.
 - Use markdown formatting when helpful (bold, lists, code blocks).
-- Keep responses appropriate and helpful.`;
+- Keep responses appropriate and helpful.
+
+Rich tag rules (strict):
+- When the user asks about a place, route, landmark, city, or "where is X", add at the END of your reply on a separate line: [[MAP: Specific Place Name, City/Country]] (short, specific search terms)
+- When a visual would help (animals, landmarks, food, people in history, products, science diagrams), add at the END of your reply on separate lines: [[IMAGE: short specific search term]] (at most 3 IMAGE tags per reply)
+- At most 1 MAP tag and at most 3 IMAGE tags per reply total as appropriate
+- Never invent image URLs. Only use the tag format above.
+- Put tags ONLY at the very end of the reply, each on its own line.`;
 
   const personalityPrompts = {
     friendly: basePrompt + '\n\nPersonality: Warm, conversational, and encouraging. Use casual but respectful language.',
