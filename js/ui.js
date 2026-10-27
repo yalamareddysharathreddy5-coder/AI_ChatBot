@@ -41,16 +41,32 @@ export function closeModal(modalId) {
 // Escape HTML to prevent XSS
 export function escapeHtml(text) {
   const div = document.createElement('div');
-  div.textContent = text;
+  div.textContent = String(text || '');
   return div.innerHTML;
 }
 
+// Sanitize text for display (strip control chars except newlines/tabs)
+export function sanitizeText(text) {
+  return String(text || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
+}
+
+// Check if URL is https
+export function isHttpsUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 // Render markdown (basic: bold, lists, code blocks with copy button)
+// Note: tags like [[MAP:...]] and [[IMAGE:...]] should be stripped by caller before rendering
 export function renderMarkdown(text) {
   if (!text) return '';
   
   // Escape HTML first for security
-  let html = escapeHtml(text);
+  let html = escapeHtml(sanitizeText(text));
   
   // Code blocks (```language\ncode\n```)
   html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
@@ -80,6 +96,35 @@ export function renderMarkdown(text) {
   html = html.replace(/\n/g, '<br>');
   
   return html;
+}
+
+// Extract MAP and IMAGE tags from text
+export function extractRichTags(text) {
+  const tags = { maps: [], images: [] };
+  if (!text) return tags;
+  const mapMatches = text.matchAll(/\[\[MAP:\s*([^\]]+)\]\]/gi);
+  for (const m of mapMatches) {
+    if (m[1] && tags.maps.length < 1) {
+      tags.maps.push(m[1].trim());
+    }
+  }
+  const imgMatches = text.matchAll(/\[\[IMAGE:\s*([^\]]+)\]\]/gi);
+  for (const m of imgMatches) {
+    if (m[1] && tags.images.length < 3) {
+      tags.images.push(m[1].trim());
+    }
+  }
+  return tags;
+}
+
+// Strip rich tags from text
+export function stripRichTags(text) {
+  if (!text) return '';
+  return text
+    .replace(/\[\[MAP:\s*[^\]]+\]\]/gi, '')
+    .replace(/\[\[IMAGE:\s*[^\]]+\]\]/gi, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 // Copy code to clipboard
@@ -223,8 +268,12 @@ export function createMessageElement(message, isUser = false) {
     bubble.appendChild(document.createElement('br'));
   }
   
+  let displayContent = message.content || '';
+  if (!isUser) {
+    displayContent = stripRichTags(displayContent);
+  }
   const textSpan = document.createElement('div');
-  textSpan.innerHTML = renderMarkdown(message.content);
+  textSpan.innerHTML = renderMarkdown(displayContent);
   bubble.appendChild(textSpan);
   
   contentDiv.appendChild(bubble);
