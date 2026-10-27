@@ -21,7 +21,7 @@ A complete, beginner-friendly AI chatbot web app built with plain HTML, CSS, and
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES Modules)
 - **Backend**: Vercel Serverless Functions (Node.js)
-- **AI**: Groq Cloud API (primary, fast) with optional Google Gemini fallback
+- **AI**: Groq Cloud API (primary, fast, OpenAI-compatible) with optional Google Gemini fallback
 - **Storage**: localStorage
 - **APIs**: Web Speech API, Canvas API
 
@@ -30,7 +30,7 @@ A complete, beginner-friendly AI chatbot web app built with plain HTML, CSS, and
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher)
-- [Groq Cloud API Key](https://console.groq.com/keys) (optional - demo mode available)
+- [Groq Cloud API Key](https://console.groq.com/keys) (recommended) (optional - demo mode available)
 
 ### Local Setup
 
@@ -45,12 +45,14 @@ cd novachat
 cp .env.example .env.local
 ```
 
-3. **Add your API key to `.env.local`** (optional)
+3. **Add your API key to `.env.local`** (recommended)
 ```env
 GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
+# Current models - see https://console.groq.com/docs/models
+GROQ_MODEL=llama-3.1-8b-instant
+GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
 ```
-*If no key is set, the app runs in demo mode. `AI_API_KEY` can also be set as an optional Gemini fallback.*
+*If no key is set, the app runs in demo mode. `AI_API_KEY` can also be set as an optional Gemini fallback. `UNSPLASH_ACCESS_KEY` is optional for image search.*
 
 4. **Start the local development server**
 ```bash
@@ -117,9 +119,12 @@ vercel --prod
 2. Click "New Project"
 3. Import your GitHub repository
 4. Vercel will auto-detect the configuration
-5. Add environment variable:
-   - Key: `AI_API_KEY`
-   - Value: Your Google Gemini API key
+5. Add environment variables (recommended):
+   - Key: `GROQ_API_KEY` - Your Groq API key (https://console.groq.com/keys)
+   - Key: `GROQ_MODEL` (optional) - defaults to a current model
+   - Key: `GROQ_VISION_MODEL` (optional) - for image uploads
+   - Key: `AI_API_KEY` (optional) - Google Gemini fallback
+   - Key: `UNSPLASH_ACCESS_KEY` (optional) - for better image search results
 6. Click "Deploy"
 
 ## ⌨️ Keyboard Shortcuts
@@ -152,9 +157,10 @@ vercel --prod
 
 ### API Key Issues
 - **Demo mode**: If no API key is set, the app uses demo responses
-- **Rate limiting**: Free tiers have rate limits; wait a moment and try again
-- **Invalid key**: Check your Groq key in `.env.local` (local) or Vercel environment variables (deployed)
+- **Rate limiting**: Free tiers have rate limits; wait a moment and try again (429 errors show friendly messages)
+- **Invalid key**: Check your Groq key in `.env.local` (local) or Vercel environment variables (deployed). 401 errors show clear guidance.
 - **Groq unavailable**: The app automatically tries the optional Gemini fallback, then demo mode
+- **Model not found**: If a model is deprecated, update `GROQ_MODEL`/`GROQ_VISION_MODEL` in env. See current models at [Groq Models](https://console.groq.com/docs/models)
 
 ### Local Development Issues
 - **Port already in use**: Set the `PORT` environment variable before running `npm run dev` (e.g. `PORT=3001` on macOS/Linux, `$env:PORT=3001` in PowerShell)
