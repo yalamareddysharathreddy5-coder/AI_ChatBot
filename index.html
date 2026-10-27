@@ -6,6 +6,7 @@
     <title>Jarvixss Chat - AI Chatbot</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/voice.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 <body>
@@ -47,12 +48,13 @@
                 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
                 <div class="header-title" id="currentChatName">New Chat</div>
                 <div class="header-actions">
-                    <button class="header-btn ripple" id="newChatHeaderBtn" aria-label="New chat">➕ New</button>
-                    <button class="header-btn ripple" id="clearChatBtn" aria-label="Clear chat">🗑️ Clear</button>
-                    <button class="header-btn ripple" id="regenerateBtn" style="display:none;" aria-label="Regenerate response">🔄 Regenerate</button>
-                    <button class="header-btn ripple" id="stopBtn" style="display:none;" aria-label="Stop generating">⏹️ Stop</button>
-                    <button class="header-btn ripple" id="themeToggleBtn" aria-label="Toggle theme">🌓 Theme</button>
-                    <button class="header-btn ripple" id="useLocationBtn" aria-label="Use my location">📍 My Location</button>
+                <button class="header-btn ripple" id="newChatHeaderBtn" aria-label="New chat">➕ New</button>
+                <button class="header-btn ripple" id="clearChatBtn" aria-label="Clear chat">🗑️ Clear</button>
+                <button class="header-btn ripple" id="regenerateBtn" style="display:none;" aria-label="Regenerate response">🔄 Regenerate</button>
+                <button class="header-btn ripple" id="stopBtn" style="display:none;" aria-label="Stop generating">⏹️ Stop</button>
+                <button class="header-btn ripple" id="voiceAssistantBtn" aria-label="Voice assistant" class="voice-assistant-btn"><span class="voice-ring"></span>🎙️ Voice Assistant</button>
+                <button class="header-btn ripple" id="themeToggleBtn" aria-label="Toggle theme">🌓 Theme</button>
+                <button class="header-btn ripple" id="useLocationBtn" aria-label="Use my location">📍 My Location</button>
                 <button class="header-btn ripple" id="settingsBtn" aria-label="Settings">⚙️ Settings</button>
                 </div>
             </header>
@@ -100,6 +102,7 @@
                 
                 <div class="input-row">
                     <div class="input-controls">
+                        <button class="input-control-btn ripple" id="emojiPickerBtn" title="Emoji" aria-label="Emoji picker">😊</button>
                         <button class="input-control-btn ripple" id="uploadImageBtn" title="Upload Image" aria-label="Upload image">🖼️</button>
                         <button class="input-control-btn ripple" id="voiceInputBtn" title="Voice Input" aria-label="Voice input">🎤</button>
                     </div>
@@ -176,9 +179,101 @@
                 </div>
                 
                 <div class="settings-group">
+                    <label for="animationIntensity">Animation Intensity</label>
+                    <select id="animationIntensity">
+                        <option value="off">Off</option>
+                        <option value="low">Low</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="emojiAnimationsToggle" checked>
+                        <label for="emojiAnimationsToggle">Emoji animations</label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
                     <div class="checkbox-row">
                         <input type="checkbox" id="soundsToggle">
                         <label for="soundsToggle">Enable Sounds</label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label>Voice Assistant</label>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="wakePhraseToggle">
+                        <label for="wakePhraseToggle">Enable wake phrase "Hey Jarvixss"</label>
+                    </div>
+                    <div style="margin-top:0.5rem;">
+                        <label for="voiceLanguageSelect">Spoken language</label>
+                        <select id="voiceLanguageSelect">
+                            <option value="auto">Auto</option>
+                            <option value="en-IN">English (India)</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="hi-IN">Hindi (hi-IN)</option>
+                            <option value="te-IN">Telugu (te-IN)</option>
+                            <option value="ta-IN">Tamil (ta-IN)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label>Voice Settings</label>
+                    <div style="margin-bottom:0.5rem;">
+                        <label for="voiceEngineSelect">Voice engine</label>
+                        <select id="voiceEngineSelect">
+                            <option value="browser">Browser voices (free)</option>
+                            <option value="cloud">Cloud voice (Groq)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label for="voiceSelect">Voice</label>
+                        <select id="voiceSelect"></select>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label for="voiceSpeed">Speed: <span id="voiceSpeedValue">1</span>x</label>
+                        <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label for="voicePitch">Pitch: <span id="voicePitchValue">1</span></label>
+                        <input type="range" id="voicePitch" min="0" max="2" step="0.1" value="1">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label for="voiceVolume">Volume: <span id="voiceVolumeValue">1</span></label>
+                        <input type="range" id="voiceVolume" min="0" max="1" step="0.1" value="1">
+                    </div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                        <button class="modal-btn" id="voicePreviewBtn">🔊 Preview voice</button>
+                        <button class="modal-btn" id="voiceResetBtn">Reset</button>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label>Voice presets</label>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <select id="voicePresetSelect"></select>
+                            <button class="modal-btn" id="voicePresetSaveBtn">Save preset</button>
+                            <button class="modal-btn" id="voicePresetApplyBtn">Apply</button>
+                            <button class="modal-btn" id="voicePresetDeleteBtn">Delete</button>
+                        </div>
+                    </div>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="autoReadToggle">
+                        <label for="autoReadToggle">Auto-read replies</label>
+                    </div>
+                    <div style="margin-top:0.5rem;">
+                        <label>Per-personality default voice</label>
+                        <select id="personalityVoiceSelect">
+                            <option value="">Use global</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="professional">Professional</option>
+                            <option value="funny">Funny</option>
+                        </select>
+                        <select id="personalityVoiceMap" style="margin-top:0.25rem;"></select>
                     </div>
                 </div>
                 
@@ -205,6 +300,51 @@
 
     <!-- Hidden file input -->
     <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+    <!-- Emoji Picker -->
+    <div id="emojiPicker" class="emoji-picker" role="dialog" aria-label="Emoji picker">
+        <div class="emoji-picker-header">
+            <input type="text" id="emojiSearch" class="emoji-search" placeholder="Search emoji..." aria-label="Search emoji">
+            <div class="emoji-skin-tone">
+                <button class="skin-tone-btn" data-tone="" title="Default">✋</button>
+                <button class="skin-tone-btn" data-tone="🏻" title="Light">✋🏻</button>
+                <button class="skin-tone-btn" data-tone="🏼" title="Medium Light">✋🏼</button>
+                <button class="skin-tone-btn" data-tone="🏽" title="Medium">✋🏽</button>
+                <button class="skin-tone-btn" data-tone="🏾" title="Medium Dark">✋🏾</button>
+                <button class="skin-tone-btn" data-tone="🏿" title="Dark">✋🏿</button>
+            </div>
+        </div>
+        <div class="emoji-tabs" id="emojiTabs"></div>
+        <div class="emoji-recent" id="emojiRecent"></div>
+        <div class="emoji-grid" id="emojiGrid" role="grid"></div>
+        <div id="emojiAutocomplete" class="emoji-autocomplete" style="display:none;"></div>
+    </div>
+
+    <!-- Voice Assistant Overlay -->
+    <div id="voiceOverlay" class="voice-overlay" role="dialog" aria-modal="true" aria-label="Voice assistant">
+        <div class="voice-orb-container">
+            <div class="voice-orb idle" id="voiceOrb" tabindex="0" role="button" aria-label="Interrupt and listen">
+                <img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="voice-orb-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="voice-orb-fallback" style="display:none">🎙️</div>
+                <div class="voice-waveform" id="voiceWaveform" style="display:none;">
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                </div>
+            </div>
+        </div>
+        <div class="voice-status" id="voiceStatus">Voice Assistant Ready</div>
+        <div class="voice-captions" id="voiceCaptions" aria-live="polite">Tap the orb to start...</div>
+        <div class="voice-controls">
+            <button class="voice-control-btn" id="voiceMuteBtn" aria-label="Mute mic">🎤 Mute</button>
+            <button class="voice-control-btn" id="voiceStopSpeakBtn" aria-label="Stop speaking">⏹️ Stop Speaking</button>
+            <button class="voice-control-btn danger" id="voiceEndBtn" aria-label="End voice mode">✖️ End</button>
+        </div>
+        <div class="voice-aria-live" aria-live="assertive" id="voiceAriaLive"></div>
+    </div>
+    <div class="voice-mic-indicator" id="voiceMicIndicator"><span>🔴</span> Mic is on</div>
 
     <footer class="app-footer">Built with ❤️ by Sharath</footer>
 
