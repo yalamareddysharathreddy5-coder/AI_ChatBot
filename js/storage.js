@@ -2,12 +2,41 @@
 // All localStorage operations with error handling and data compression
 
 const STORAGE_KEYS = {
+  SESSIONS: 'jarvixss_sessions',
+  CURRENT_SESSION: 'jarvixss_current_session',
+  THEME: 'jarvixss_theme',
+  SETTINGS: 'jarvixss_settings',
+  DRAFT: 'jarvixss_draft'
+};
+
+const OLD_STORAGE_KEYS = {
   SESSIONS: 'novachat_sessions',
   CURRENT_SESSION: 'novachat_current_session',
   THEME: 'novachat_theme',
   SETTINGS: 'novachat_settings',
   DRAFT: 'novachat_draft'
 };
+
+// One-time migration from old keys
+function migrateStorage() {
+  try {
+    for (const key of Object.keys(OLD_STORAGE_KEYS)) {
+      const oldKey = OLD_STORAGE_KEYS[key];
+      const newKey = STORAGE_KEYS[key];
+      if (oldKey === newKey) continue;
+      if (localStorage.getItem(newKey) !== null) continue;
+      const oldData = localStorage.getItem(oldKey);
+      if (oldData !== null) {
+        localStorage.setItem(newKey, oldData);
+        localStorage.removeItem(oldKey);
+      }
+    }
+  } catch (e) {
+    console.error('Storage migration error:', e);
+  }
+}
+
+migrateStorage();
 
 // Save all chat sessions
 export function saveSessions(sessions) {

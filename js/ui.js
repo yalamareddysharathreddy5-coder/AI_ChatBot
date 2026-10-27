@@ -162,12 +162,12 @@ export function downloadImage(dataUrl, filename = 'image.png') {
 
 // Download chat as text
 export function downloadChatAsText(messages, sessionName = 'chat') {
-  let text = `NovaChat - ${sessionName}\n`;
+  let text = `Jarvixss Chat - ${sessionName}\n`;
   text += `Date: ${new Date().toLocaleString()}\n`;
   text += '='.repeat(50) + '\n\n';
   
   messages.forEach(msg => {
-    const role = msg.role === 'user' ? 'You' : 'Nova';
+    const role = msg.role === 'user' ? 'You' : 'Jarvixss Chat';
     text += `[${role}] ${msg.timestamp || ''}\n`;
     text += `${msg.content}\n\n`;
     if (msg.image) {
@@ -179,7 +179,7 @@ export function downloadChatAsText(messages, sessionName = 'chat') {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `novachat-${sessionName.replace(/[^a-z0-9]/gi, '_')}.txt`;
+  link.download = `jarvixss-chat-${sessionName.replace(/[^a-z0-9]/gi, '_')}.txt`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -190,7 +190,7 @@ export function downloadChatAsText(messages, sessionName = 'chat') {
 // Download chat as JSON
 export function downloadChatAsJson(messages, sessionName = 'chat') {
   const data = {
-    app: 'NovaChat',
+    app: 'Jarvixss Chat',
     sessionName,
     exportDate: new Date().toISOString(),
     messages
@@ -200,7 +200,7 @@ export function downloadChatAsJson(messages, sessionName = 'chat') {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `novachat-${sessionName.replace(/[^a-z0-9]/gi, '_')}.json`;
+  link.download = `jarvixss-chat-${sessionName.replace(/[^a-z0-9]/gi, '_')}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
