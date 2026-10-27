@@ -5,8 +5,10 @@ A complete, beginner-friendly AI chatbot web app built with plain HTML, CSS, and
 ## ✨ Features
 
 - **Chat Interface**: User and bot message bubbles with timestamps, auto-scroll, and markdown rendering
-- **AI-Powered**: Answers any topic with balanced, neutral responses using Google Gemini API
-- **Image Support**: Upload, drag-and-drop, or paste images (up to 5MB). AI can see images if vision is supported
+- **AI-Powered**: Answers any topic with balanced, neutral responses using Groq Cloud API (OpenAI-compatible) with optional Gemini fallback
+- **Rich Maps**: When asking about places/landmarks, the bot adds a map tag rendered with Leaflet + OpenStreetMap (Nominatim geocoding, cached). Includes "Open in Google Maps", directions, copy coordinates. "Use my location" button supported.
+- **Rich Images**: Visual queries get image galleries from Wikimedia Commons (or Unsplash if `UNSPLASH_ACCESS_KEY` set) with lazy loading, lightbox, download, and credits.
+- **Image Support**: Upload, drag-and-drop, or paste images (up to 5MB). AI can see images if vision is supported (Groq vision model)
 - **Image & Chat Export**: Download images, export chats as TXT or JSON
 - **Multiple Sessions**: Save and manage multiple chat sessions with rename, delete, and search
 - **Voice Features**: Voice input (Web Speech API) and text-to-speech
@@ -19,11 +21,13 @@ A complete, beginner-friendly AI chatbot web app built with plain HTML, CSS, and
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES Modules)
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES Modules), Leaflet
 - **Backend**: Vercel Serverless Functions (Node.js)
 - **AI**: Groq Cloud API (primary, fast, OpenAI-compatible) with optional Google Gemini fallback
+- **Maps**: Leaflet + OpenStreetMap, Nominatim geocoding
+- **Images**: Wikimedia Commons/Wikipedia API, Unsplash API (optional)
 - **Storage**: localStorage
-- **APIs**: Web Speech API, Canvas API
+- **APIs**: Web Speech API, Canvas API, Geolocation API
 
 ## 🚀 Getting Started
 
@@ -76,6 +80,10 @@ To use Vercel's local emulator instead, run `npm run dev:vercel` (requires the V
 ### Optional Gemini Fallback
 
 If you also want a backup provider, add a Google Gemini key from [Google AI Studio](https://makersuite.google.com/app/apikey) as `AI_API_KEY`. Groq is always tried first when configured.
+
+### Optional Unsplash Images
+
+For better image results, add an Unsplash Access Key from [Unsplash Developers](https://unsplash.com/developers) as `UNSPLASH_ACCESS_KEY`. If not set, the app falls back to Wikimedia Commons.
 
 ## 📤 Push to GitHub
 
@@ -170,6 +178,15 @@ vercel --prod
 ### Image Upload Issues
 - **File too large**: Images are limited to 5MB
 - **Compression**: Large images are auto-compressed to ~300KB
+
+## 📝 Credits
+
+- [OpenStreetMap](https://www.openstreetmap.org/) - Map tiles and data
+- [Leaflet](https://leafletjs.com/) - Interactive maps
+- [Nominatim](https://nominatim.org/) - Geocoding
+- [Wikimedia Commons](https://commons.wikimedia.org/) - Image search
+- [Unsplash](https://unsplash.com/) - Optional image source
+- [Groq](https://console.groq.com/) - AI inference
 
 ## 📝 License
 
