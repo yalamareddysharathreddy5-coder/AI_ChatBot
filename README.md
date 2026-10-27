@@ -1,4 +1,8 @@
-# NovaChat
+# Jarvixss Chat
+
+<div align="center">
+  <img src="assets/logo.jpg" alt="Jarvixss Chat logo" width="120" height="120" style="border-radius:50%;">
+</div>
 
 A complete, beginner-friendly AI chatbot web app built with plain HTML, CSS, and vanilla JavaScript. Features a futuristic glassmorphism + neon gradient design, multiple chat sessions, image uploads, voice input, and AI-powered conversations.
 
@@ -178,6 +182,14 @@ vercel --prod
 ### Image Upload Issues
 - **File too large**: Images are limited to 5MB
 - **Compression**: Large images are auto-compressed to ~300KB
+
+## 👤 Creator
+
+**Jarvixss Chat** was created and developed by **Sharath** (21 years old, final year B.Tech CSE-AIML student). Built as a personal project using HTML, CSS, and JavaScript, deployed on Vercel. The app is powered by a large language model served through the Groq API, with design and features built by Sharath.
+
+## 📸 Screenshots
+
+*Screenshots placeholder - Add your own screenshots here.*
 
 ## 📝 Credits
 
