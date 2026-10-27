@@ -250,7 +250,11 @@ export function createMessageElement(message, isUser = false) {
   
   const avatar = document.createElement('div');
   avatar.className = 'message-avatar';
-  avatar.textContent = isUser ? '👤' : '🤖';
+  if (isUser) {
+    avatar.textContent = '👤';
+  } else {
+    avatar.innerHTML = `<img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="bot-avatar-img" onerror="this.style.display='none'; this.parentElement.textContent='🤖'">`;
+  }
   
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
@@ -368,7 +372,7 @@ export function createTypingIndicator() {
   
   const avatar = document.createElement('div');
   avatar.className = 'message-avatar';
-  avatar.textContent = '🤖';
+  avatar.innerHTML = `<img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="bot-avatar-img" onerror="this.style.display='none'; this.parentElement.textContent='🤖'">`;
   
   const bubble = document.createElement('div');
   bubble.className = 'typing-bubble';
