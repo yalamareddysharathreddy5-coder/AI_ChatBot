@@ -22,7 +22,7 @@ const GEMINI_MODELS = [
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
@@ -46,6 +46,13 @@ export default async function handler(req, res) {
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'Invalid messages format' });
+    }
+
+    // Basic validation
+    for (const m of messages) {
+      if (m && typeof m.content === 'string' && m.content.length > 10000) {
+        return res.status(400).json({ error: 'Message too long' });
+      }
     }
 
     const groqKey = process.env.GROQ_API_KEY;
