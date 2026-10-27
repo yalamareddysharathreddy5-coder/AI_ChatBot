@@ -1,0 +1,17 @@
+{
+  "name": "novachat",
+  "version": "1.0.0",
+  "description": "A complete, beginner-friendly AI chatbot web app called NovaChat using plain HTML, CSS and vanilla JavaScript",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "dev:vercel": "vercel dev",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["chatbot", "ai", "novachat", "gemini"],
+  "author": "",
+  "license": "MIT"
+}
