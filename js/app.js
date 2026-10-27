@@ -11,6 +11,7 @@ let currentSettings = {};
 let isGenerating = false;
 let currentAbortController = null;
 let attachedImages = [];
+let userLocation = null; // {lat, lon}
 
 // Initialize the app
 function init() {
@@ -120,6 +121,12 @@ function setupEventListeners() {
   
   // Theme toggle
   document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+  // Use my location
+  const locBtn = document.getElementById('useLocationBtn');
+  if (locBtn) {
+    locBtn.addEventListener('click', getUserLocation);
+  }
   
   // Settings
   document.getElementById('settingsBtn').addEventListener('click', () => ui.openModal('settingsModal'));
@@ -211,6 +218,9 @@ function loadCurrentSession() {
     session.messages.forEach(msg => {
       const msgEl = ui.createMessageElement(msg, msg.role === 'user');
       messagesContainer.appendChild(msgEl);
+      if (msg.role === 'assistant') {
+        renderRichContent(msgEl, msg.content);
+      }
     });
   }
   
@@ -395,6 +405,17 @@ async function generateResponse() {
       content: m.content
     }));
     
+    // Add location context if available
+    if (userLocation && contextMessages.length > 0) {
+      const lastUser = [...contextMessages].reverse().find(m => m.role === 'user');
+      if (lastUser && /restaurant|near me|nearby|food|cafe|hotel/i.test(lastUser.content || '')) {
+        contextMessages.push({
+          role: 'user',
+          content: `[User location context: lat=${userLocation.lat}, lon=${userLocation.lon}. Consider nearby places if relevant.]`
+        });
+      }
+    }
+    
     // Get personality from settings
     const personality = currentSettings.personality || 'friendly';
     
@@ -436,11 +457,13 @@ async function generateResponse() {
     
     const botMsgEl = ui.createMessageElement(botMessage, false);
     messagesContainer.appendChild(botMsgEl);
+    // Render rich tags after adding to DOM
+    renderRichContent(botMsgEl, botMessage.content);
     ui.scrollToBottom(messagesContainer);
     
     document.getElementById('regenerateBtn').style.display = 'inline-block';
     
-  } catch (error) {
+    } catch (error) {
     // Remove typing indicator
     const typingEl = document.getElementById('typingIndicator');
     if (typingEl) typingEl.remove();
@@ -463,6 +486,7 @@ async function generateResponse() {
       
       const botMsgEl = ui.createMessageElement(botMessage, false);
       messagesContainer.appendChild(botMsgEl);
+      renderRichContent(botMsgEl, botMessage.content);
       ui.scrollToBottom(messagesContainer);
       
       ui.showToast('Using demo mode', 'warning');
@@ -616,6 +640,325 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', newTheme);
   storage.saveTheme(newTheme);
   ui.showToast(`${newTheme === 'dark' ? 'Dark' : 'Light'} mode enabled`, 'success');
+}
+
+// Get user location
+function getUserLocation() {
+  if (!navigator.geolocation) {
+    ui.showToast('Geolocation not supported', 'warning');
+    return;
+  }
+  ui.showToast('Requesting location...', 'info');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLocation = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude
+      };
+      ui.showToast('Location obtained', 'success');
+      // Show location map
+      showUserLocationMap(userLocation);
+    },
+    (err) => {
+      console.error('Geolocation error:', err);
+      ui.showToast('Location access denied or unavailable', 'warning');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+function showUserLocationMap(loc) {
+  const messagesContainer = document.getElementById('chatMessages');
+  const card = document.createElement('div');
+  card.className = 'map-card';
+  card.style.margin = '1rem';
+  
+  const title = document.createElement('div');
+  title.className = 'map-card-title';
+  title.textContent = '📍 Your Location';
+  card.appendChild(title);
+  
+  const mapDiv = document.createElement('div');
+  mapDiv.className = 'map-container';
+  mapDiv.id = 'user-loc-map-' + Date.now();
+  card.appendChild(mapDiv);
+  
+  const actions = document.createElement('div');
+  actions.className = 'map-card-actions';
+  
+  const gmapsBtn = document.createElement('button');
+  gmapsBtn.className = 'map-action-btn';
+  gmapsBtn.textContent = 'Open in Google Maps';
+  gmapsBtn.onclick = () => window.open(`https://maps.google.com/?q=${loc.lat},${loc.lon}`, '_blank');
+  
+  const dirBtn = document.createElement('button');
+  dirBtn.className = 'map-action-btn';
+  dirBtn.textContent = 'Get directions';
+  dirBtn.onclick = () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lon}`, '_blank');
+  
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'map-action-btn';
+  copyBtn.textContent = 'Copy coordinates';
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(`${loc.lat}, ${loc.lon}`).then(() => ui.showToast('Coordinates copied', 'success'));
+  };
+  
+  actions.appendChild(gmapsBtn);
+  actions.appendChild(dirBtn);
+  actions.appendChild(copyBtn);
+  card.appendChild(actions);
+  
+  messagesContainer.appendChild(card);
+  ui.scrollToBottom(messagesContainer);
+  
+  setTimeout(() => {
+    if (typeof L !== 'undefined') {
+      const map = L.map(mapDiv.id).setView([loc.lat, loc.lon], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      L.marker([loc.lat, loc.lon]).addTo(map).bindPopup('You are here').openPopup();
+    }
+  }, 100);
+}
+
+// Render rich content (maps and images) for bot messages
+async function renderRichContent(messageEl, content) {
+  const bubble = messageEl.querySelector('.message-bubble');
+  if (!bubble || !content) return;
+  
+  const tags = ui.extractRichTags(content);
+  
+  // Render maps
+  if (tags.maps.length > 0) {
+    for (const query of tags.maps) {
+      await renderMapCard(bubble, query);
+    }
+  }
+  
+  // Render images
+  if (tags.images.length > 0) {
+    await renderImageGallery(bubble, tags.images);
+  }
+}
+
+async function renderMapCard(bubble, query) {
+  const card = document.createElement('div');
+  card.className = 'map-card';
+  
+  const title = document.createElement('div');
+  title.className = 'map-card-title';
+  title.textContent = `🗺️ ${ui.escapeHtml(query)}`;
+  card.appendChild(title);
+  
+  const mapDiv = document.createElement('div');
+  mapDiv.className = 'map-container';
+  mapDiv.id = 'map-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+  card.appendChild(mapDiv);
+  
+  const skeleton = document.createElement('div');
+  skeleton.className = 'map-skeleton';
+  skeleton.textContent = 'Loading map...';
+  mapDiv.appendChild(skeleton);
+  
+  const actions = document.createElement('div');
+  actions.className = 'map-card-actions';
+  card.appendChild(actions);
+  
+  bubble.appendChild(card);
+  
+  // Check cache
+  const cacheKey = 'nominatim:' + query.toLowerCase();
+  let coords = null;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      coords = JSON.parse(cached);
+    }
+  } catch {}
+  
+  if (!coords) {
+    try {
+      // Rate limit - simple delay
+      await new Promise(r => setTimeout(r, 1000));
+      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+        headers: {
+          'User-Agent': 'NovaChat/1.0'
+        }
+      });
+      const data = await resp.json();
+      if (data && data[0]) {
+        coords = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display_name: data[0].display_name };
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(coords));
+        } catch {}
+      }
+    } catch (e) {
+      console.error('Geocoding error:', e);
+    }
+  }
+  
+  skeleton.remove();
+  
+  if (!coords) {
+    const msg = document.createElement('div');
+    msg.className = 'map-error';
+    msg.textContent = 'Could not load map for this location.';
+    mapDiv.appendChild(msg);
+    return;
+  }
+  
+  // Render map
+  setTimeout(() => {
+    if (typeof L !== 'undefined') {
+      try {
+        const map = L.map(mapDiv.id).setView([coords.lat, coords.lon], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([coords.lat, coords.lon]).addTo(map).bindPopup(coords.display_name || query).openPopup();
+        
+        // Add actions
+        const gmapsBtn = document.createElement('button');
+        gmapsBtn.className = 'map-action-btn';
+        gmapsBtn.textContent = 'Open in Google Maps';
+        gmapsBtn.onclick = () => window.open(`https://maps.google.com/?q=${coords.lat},${coords.lon}`, '_blank');
+        
+        const dirBtn = document.createElement('button');
+        dirBtn.className = 'map-action-btn';
+        dirBtn.textContent = 'Get directions';
+        dirBtn.onclick = () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lon}`, '_blank');
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'map-action-btn';
+        copyBtn.textContent = 'Copy coordinates';
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(`${coords.lat}, ${coords.lon}`).then(() => ui.showToast('Coordinates copied', 'success'));
+        };
+        
+        actions.appendChild(gmapsBtn);
+        actions.appendChild(dirBtn);
+        actions.appendChild(copyBtn);
+      } catch (e) {
+        console.error('Leaflet error:', e);
+        const msg = document.createElement('div');
+        msg.className = 'map-error';
+        msg.textContent = 'Could not render map.';
+        mapDiv.appendChild(msg);
+      }
+    }
+  }, 50);
+}
+
+async function renderImageGallery(bubble, queries) {
+  for (const q of queries) {
+    const gallery = document.createElement('div');
+    gallery.className = 'image-gallery';
+    
+    const title = document.createElement('div');
+    title.className = 'image-gallery-title';
+    title.textContent = `🖼️ ${ui.escapeHtml(q)}`;
+    gallery.appendChild(title);
+    
+    const grid = document.createElement('div');
+    grid.className = 'image-gallery-grid';
+    gallery.appendChild(grid);
+    
+    const skeleton = document.createElement('div');
+    skeleton.className = 'image-skeleton';
+    skeleton.textContent = 'Loading images...';
+    grid.appendChild(skeleton);
+    
+    bubble.appendChild(gallery);
+    
+    try {
+      const resp = await fetch(`/api/image?q=${encodeURIComponent(q)}`);
+      const data = await resp.json();
+      const results = data.results || [];
+      skeleton.remove();
+      
+      if (results.length === 0) {
+        gallery.style.display = 'none';
+        continue;
+      }
+      
+      for (const imgData of results) {
+        const item = document.createElement('div');
+        item.className = 'image-gallery-item';
+        
+        const img = document.createElement('img');
+        img.className = 'image-gallery-img';
+        img.src = imgData.thumbnailUrl || imgData.imageUrl;
+        img.loading = 'lazy';
+        img.alt = imgData.title || q;
+        
+        img.onclick = () => openLightbox(imgData.imageUrl, imgData.credit || imgData.author);
+        
+        const credit = document.createElement('div');
+        credit.className = 'image-credit';
+        const link = document.createElement('a');
+        link.href = imgData.source || '#';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = imgData.credit || imgData.author || 'Source';
+        credit.appendChild(link);
+        
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'image-dl-btn';
+        dlBtn.textContent = 'Download';
+        dlBtn.onclick = async (e) => {
+          e.stopPropagation();
+          try {
+            const r = await fetch(imgData.imageUrl);
+            const blob = await r.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const ext = blob.type.split('/')[1] || 'jpg';
+            a.download = `nova-image-${Date.now()}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            ui.showToast('Image downloaded', 'success');
+          } catch (err) {
+            console.error('Download error:', err);
+            ui.showToast('Download failed', 'error');
+          }
+        };
+        
+        item.appendChild(img);
+        item.appendChild(credit);
+        item.appendChild(dlBtn);
+        grid.appendChild(item);
+      }
+    } catch (e) {
+      console.error('Image fetch error:', e);
+      skeleton.remove();
+      gallery.style.display = 'none';
+    }
+  }
+}
+
+function openLightbox(url, credit) {
+  if (!ui.isHttpsUrl(url)) return;
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  lb.onclick = () => lb.remove();
+  
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = 'Enlarged image';
+  img.onclick = (e) => e.stopPropagation();
+  
+  const cred = document.createElement('div');
+  cred.className = 'lightbox-credit';
+  cred.textContent = credit ? `Credit: ${credit}` : '';
+  cred.onclick = (e) => e.stopPropagation();
+  
+  lb.appendChild(img);
+  if (credit) lb.appendChild(cred);
+  document.body.appendChild(lb);
 }
 
 // Save settings
