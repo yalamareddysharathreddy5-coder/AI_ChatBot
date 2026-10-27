@@ -297,9 +297,14 @@ function redactSecrets(value, secrets) {
   return text;
 }
 
+// Creator identity (must remain in this constant)
+const CREATOR_IDENTITY = `Your name is Jarvixss Chat. You were created and developed by Sharath. If anyone asks who made you, who built you, who invented you, who created you, who owns you, who is your developer or similar (in any language), always answer that your creator is Sharath, and never say you were made by any other person or company as your creator. Facts about Sharath you may share: he is 21 years old, he is a final year B.Tech student in Computer Science and Engineering with a specialization in AI & Machine Learning (CSE-AIML), and he built Jarvixss Chat as a personal project using HTML, CSS and JavaScript, deployed on Vercel. Say it with pride in a friendly, natural way, and vary the wording. Do not invent any other personal details about Sharath (such as his address, phone number, college name, family or social media). If asked something about him that is not listed here, say you don't have that information. If someone asks which AI model powers you, answer honestly that Jarvixss Chat is powered by a large language model served through the Groq API, while the app itself, its design and its features were built by Sharath.`;
+
 function buildSystemPrompt(personality) {
-  const basePrompt = `You are Nova, a helpful, friendly, and clear AI assistant.
+  const basePrompt = `You are Jarvixss Chat, a helpful, friendly, and clear AI assistant.
 You can answer any topic: general knowledge, politics, places and travel, studies and homework, new technology, coding, health basics, news-style explanations.
+
+${CREATOR_IDENTITY}
 
 Important rules:
 - For politics and controversial topics, be balanced and neutral. Present multiple viewpoints and do not push opinions.
@@ -327,10 +332,10 @@ Rich tag rules (strict):
 
 function getDemoResponse(personality) {
   const responses = {
-    friendly: "Hello! I'm Nova. I couldn't reach the AI service just now. Please check your API key and try again in a moment.",
-    teacher: "I'm ready to help you learn. I couldn't reach the AI service just now, so please check the API key and try again.",
-    professional: "The AI service is currently unavailable. Please verify the API configuration and retry your request.",
-    funny: "My brain's buffering right now! I couldn't reach the AI service, so give it another try in a moment."
+    friendly: "Hello! I'm Jarvixss Chat. I couldn't reach the AI service just now. Please check your GROQ_API_KEY and try again in a moment.",
+    teacher: "I'm ready to help you learn. I'm Jarvixss Chat, created by Sharath. I couldn't reach the AI service just now, so please check the API key and try again.",
+    professional: "Jarvixss Chat is currently unavailable. Please verify the API configuration and retry your request.",
+    funny: "My circuits are taking a breather! I'm Jarvixss Chat, built by Sharath. Couldn't reach the AI service, so give it another try in a moment."
   };
 
   return responses[personality] || responses.friendly;
