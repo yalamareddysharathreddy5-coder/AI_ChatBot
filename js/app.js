@@ -4,6 +4,7 @@
 import * as storage from './storage.js';
 import * as ui from './ui.js';
 import { initEmojiPicker, replaceShortcodes, triggerEmojiBurst, countEmojis } from './emoji.js';
+import { initVoiceAssistant, speakMessage } from './voice.js';
 
 // Application state
 let currentSessionId = null;
@@ -50,6 +51,29 @@ function init() {
   });
 
   initEmojiPicker();
+  initVoiceAssistant({
+    getSettings: () => currentSettings,
+    sendMessage: sendVoiceMessage,
+    getMessageText
+  });
+}
+
+function getMessageText(messageId) {
+  const current = sessions[currentSessionId];
+  const currentMessage = current?.messages.find(message => message.id === messageId);
+  if (currentMessage) return currentMessage.content || '';
+  for (const session of Object.values(sessions)) {
+    const message = session.messages.find(item => item.id === messageId);
+    if (message) return message.content || '';
+  }
+  return '';
+}
+
+async function sendVoiceMessage(text) {
+  const input = document.getElementById('messageInput');
+  input.value = text;
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  return handleSendMessage({ autoRead: false });
 }
 
 // Apply settings
@@ -64,7 +88,7 @@ function applySettings() {
 // Setup all event listeners
 function setupEventListeners() {
   // Send button
-  document.getElementById('sendBtn').addEventListener('click', handleSendMessage);
+  document.getElementById('sendBtn').addEventListener('click', () => handleSendMessage());
   
   // Message input
   const messageInput = document.getElementById('messageInput');
@@ -336,12 +360,12 @@ function toggleSidebar() {
 }
 
 // Handle send message
-async function handleSendMessage() {
+async function handleSendMessage({ autoRead = true } = {}) {
   const input = document.getElementById('messageInput');
   const rawMessage = input.value.trim();
   const message = replaceShortcodes(rawMessage);
 
-  if ((!message && attachedImages.length === 0) || isGenerating) return;
+  if ((!message && attachedImages.length === 0) || isGenerating) return null;
   
   // Hide welcome screen
   document.querySelector('.welcome-screen').style.display = 'none';
@@ -386,13 +410,13 @@ async function handleSendMessage() {
   renderSidebar();
   
   // Show typing indicator and generate response
-  await generateResponse();
+  return generateResponse({ autoRead });
 }
 
 // Generate AI response
-async function generateResponse() {
+async function generateResponse({ autoRead = true } = {}) {
   const session = sessions[currentSessionId];
-  if (!session || session.messages.length === 0 || isGenerating) return;
+  if (!session || session.messages.length === 0 || isGenerating) return null;
 
   isGenerating = true;
   document.getElementById('sendBtn').disabled = true;
@@ -470,6 +494,8 @@ async function generateResponse() {
     ui.scrollToBottom(messagesContainer);
     
     document.getElementById('regenerateBtn').style.display = 'inline-block';
+    if (autoRead && currentSettings.autoRead) speakMessage(botMessage.id);
+    return botMessage.content;
     
     } catch (error) {
     // Remove typing indicator
@@ -498,6 +524,8 @@ async function generateResponse() {
       ui.scrollToBottom(messagesContainer);
       
       ui.showToast('Using demo mode', 'warning');
+      if (autoRead && currentSettings.autoRead) speakMessage(botMessage.id);
+      return botMessage.content;
     }
     document.getElementById('regenerateBtn').style.display = 'inline-block';
   }
@@ -505,6 +533,7 @@ async function generateResponse() {
   isGenerating = false;
   document.getElementById('sendBtn').disabled = false;
   document.getElementById('stopBtn').style.display = 'none';
+  return null;
 }
 
 // Regenerate response

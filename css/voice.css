@@ -193,6 +193,21 @@
   backdrop-filter: blur(10px);
 }
 
+.voice-debug {
+  max-width: 560px;
+  margin: 0 1rem 1.25rem;
+  padding: 0.4rem 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  text-align: center;
+  word-break: break-word;
+}
+
 .voice-controls {
   display: flex;
   gap: 1rem;

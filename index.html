@@ -53,7 +53,7 @@
                 <button class="header-btn ripple" id="clearChatBtn" aria-label="Clear chat">🗑️ Clear</button>
                 <button class="header-btn ripple" id="regenerateBtn" style="display:none;" aria-label="Regenerate response">🔄 Regenerate</button>
                 <button class="header-btn ripple" id="stopBtn" style="display:none;" aria-label="Stop generating">⏹️ Stop</button>
-                <button class="header-btn ripple" id="voiceAssistantBtn" aria-label="Voice assistant" class="voice-assistant-btn"><span class="voice-ring"></span>🎙️ Voice Assistant</button>
+                <button class="header-btn ripple voice-assistant-btn" id="voiceAssistantBtn" aria-label="Voice assistant"><span class="voice-ring"></span>🎙️ Voice Assistant</button>
                 <button class="header-btn ripple" id="themeToggleBtn" aria-label="Toggle theme">🌓 Theme</button>
                 <button class="header-btn ripple" id="useLocationBtn" aria-label="Use my location">📍 My Location</button>
                 <button class="header-btn ripple" id="settingsBtn" aria-label="Settings">⚙️ Settings</button>
@@ -338,6 +338,7 @@
         </div>
         <div class="voice-status" id="voiceStatus">Voice Assistant Ready</div>
         <div class="voice-captions" id="voiceCaptions" aria-live="polite">Tap the orb to start...</div>
+        <div class="voice-debug" id="voiceDebug">State: idle | Last error: none</div>
         <div class="voice-controls">
             <button class="voice-control-btn" id="voiceMuteBtn" aria-label="Mute mic">🎤 Mute</button>
             <button class="voice-control-btn" id="voiceStopSpeakBtn" aria-label="Stop speaking">⏹️ Stop Speaking</button>
