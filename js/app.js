@@ -3,6 +3,7 @@
 
 import * as storage from './storage.js';
 import * as ui from './ui.js';
+import { initEmojiPicker, replaceShortcodes, triggerEmojiBurst, countEmojis } from './emoji.js';
 
 // Application state
 let currentSessionId = null;
@@ -47,6 +48,8 @@ function init() {
   document.querySelectorAll('.ripple').forEach(btn => {
     ui.addRippleEffect(btn);
   });
+
+  initEmojiPicker();
 }
 
 // Apply settings
@@ -335,8 +338,9 @@ function toggleSidebar() {
 // Handle send message
 async function handleSendMessage() {
   const input = document.getElementById('messageInput');
-  const message = input.value.trim();
-  
+  const rawMessage = input.value.trim();
+  const message = replaceShortcodes(rawMessage);
+
   if ((!message && attachedImages.length === 0) || isGenerating) return;
   
   // Hide welcome screen
@@ -366,7 +370,11 @@ async function handleSendMessage() {
   const userMsgEl = ui.createMessageElement(userMessage, true);
   messagesContainer.appendChild(userMsgEl);
   ui.scrollToBottom(messagesContainer);
-  
+
+  if (countEmojis(message) > 0) {
+    triggerEmojiBurst();
+  }
+
   // Clear input
   input.value = '';
   input.style.height = 'auto';

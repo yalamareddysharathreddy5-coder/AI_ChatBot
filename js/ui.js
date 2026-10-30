@@ -258,7 +258,7 @@ export function createMessageElement(message, isUser = false) {
   
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
-  
+
   const bubble = document.createElement('div');
   bubble.className = 'message-bubble';
   
@@ -294,32 +294,52 @@ export function createMessageElement(message, isUser = false) {
   if (!isUser) {
     const actions = document.createElement('div');
     actions.className = 'message-actions';
-    
+
     const copyBtn = document.createElement('button');
     copyBtn.className = 'message-action-btn';
     copyBtn.textContent = '📋 Copy';
     copyBtn.onclick = () => copyMessage(message.content);
-    
+
     const ttsBtn = document.createElement('button');
-    ttsBtn.className = 'message-action-btn';
+    ttsBtn.className = 'message-action-btn read-aloud-btn';
+    ttsBtn.dataset.messageId = message.id;
     ttsBtn.textContent = '🔊 Read';
-    ttsBtn.onclick = () => textToSpeech(message.content);
-    
+    ttsBtn.title = 'Read this message aloud';
+
+    const voiceMenuBtn = document.createElement('button');
+    voiceMenuBtn.className = 'message-action-btn voice-menu-btn';
+    voiceMenuBtn.dataset.messageId = message.id;
+    voiceMenuBtn.textContent = '▾';
+    voiceMenuBtn.title = 'Choose a voice for this message';
+    voiceMenuBtn.setAttribute('aria-label', 'Choose a voice for this message');
+
+    const reactBtn = document.createElement('button');
+    reactBtn.className = 'message-action-btn add-reaction-btn';
+    reactBtn.dataset.messageId = message.id;
+    reactBtn.textContent = '😊+';
+    reactBtn.title = 'Add a reaction';
+
     const likeBtn = document.createElement('button');
-    likeBtn.className = 'message-action-btn';
+    likeBtn.className = 'message-action-btn quick-reaction-btn';
+    likeBtn.dataset.messageId = message.id;
+    likeBtn.dataset.reaction = '👍';
     likeBtn.textContent = '👍';
-    likeBtn.onclick = () => showToast('Thanks for feedback!', 'success');
-    
+    likeBtn.title = 'React with thumbs up';
+
     const dislikeBtn = document.createElement('button');
-    dislikeBtn.className = 'message-action-btn';
+    dislikeBtn.className = 'message-action-btn quick-reaction-btn';
+    dislikeBtn.dataset.messageId = message.id;
+    dislikeBtn.dataset.reaction = '👎';
     dislikeBtn.textContent = '👎';
-    dislikeBtn.onclick = () => showToast('Thanks for feedback!', 'info');
-    
+    dislikeBtn.title = 'React with thumbs down';
+
     actions.appendChild(copyBtn);
     actions.appendChild(ttsBtn);
+    actions.appendChild(voiceMenuBtn);
+    actions.appendChild(reactBtn);
     actions.appendChild(likeBtn);
     actions.appendChild(dislikeBtn);
-    
+
     if (message.image) {
       const dlBtn = document.createElement('button');
       dlBtn.className = 'message-action-btn';
@@ -327,25 +347,37 @@ export function createMessageElement(message, isUser = false) {
       dlBtn.onclick = () => downloadImage(message.image, 'nova-image.png');
       actions.appendChild(dlBtn);
     }
-    
+
     contentDiv.appendChild(actions);
   } else {
     const actions = document.createElement('div');
     actions.className = 'message-actions';
     actions.style.justifyContent = 'flex-end';
-    
+
     const copyBtn = document.createElement('button');
     copyBtn.className = 'message-action-btn';
     copyBtn.textContent = '📋 Copy';
     copyBtn.onclick = () => copyMessage(message.content);
-    
+
+    const reactBtn = document.createElement('button');
+    reactBtn.className = 'message-action-btn add-reaction-btn';
+    reactBtn.dataset.messageId = message.id;
+    reactBtn.textContent = '😊+';
+    reactBtn.title = 'Add a reaction';
+
     actions.appendChild(copyBtn);
+    actions.appendChild(reactBtn);
     contentDiv.appendChild(actions);
   }
-  
+
+  const reactions = document.createElement('div');
+  reactions.className = 'message-reactions';
+  reactions.dataset.messageId = message.id;
+  contentDiv.appendChild(reactions);
+
   messageDiv.appendChild(avatar);
   messageDiv.appendChild(contentDiv);
-  
+
   return messageDiv;
 }
 
