@@ -1,220 +1,278 @@
 # Jarvixss Chat
 
 <div align="center">
-  <img src="assets/logo.jpg" alt="Jarvixss Chat logo" width="120" height="120" style="border-radius:50%;">
+  <img src="assets/logo.svg" alt="Jarvixss Chat logo" width="120" height="120">
 </div>
 
-A complete, beginner-friendly AI chatbot web app built with plain HTML, CSS, and vanilla JavaScript. Features a futuristic glassmorphism + neon gradient design, multiple chat sessions, image uploads, voice input, and AI-powered conversations.
+Jarvixss Chat is a complete AI chatbot web app built with plain HTML, CSS, and vanilla JavaScript. It combines a futuristic glassmorphism interface with serverless AI endpoints for chat, voice input, read-aloud replies, maps, image search, emoji reactions, and locally saved conversations.
 
-## ✨ Features
+Created and developed by **Sharath**.
 
-- **Chat Interface**: User and bot message bubbles with timestamps, auto-scroll, and markdown rendering
-- **AI-Powered**: Answers any topic with balanced, neutral responses using Groq Cloud API (OpenAI-compatible) with optional Gemini fallback
-- **Rich Maps**: When asking about places/landmarks, the bot adds a map tag rendered with Leaflet + OpenStreetMap (Nominatim geocoding, cached). Includes "Open in Google Maps", directions, copy coordinates. "Use my location" button supported.
-- **Rich Images**: Visual queries get image galleries from Wikimedia Commons (or Unsplash if `UNSPLASH_ACCESS_KEY` set) with lazy loading, lightbox, download, and credits.
-- **Image Support**: Upload, drag-and-drop, or paste images (up to 5MB). AI can see images if vision is supported (Groq vision model)
-- **Image & Chat Export**: Download images, export chats as TXT or JSON
-- **Multiple Sessions**: Save and manage multiple chat sessions with rename, delete, and search
-- **Voice Features**: Voice input (Web Speech API) and text-to-speech
-- **Themes**: Dark/Light mode with CSS variables
-- **Personalities**: Choose AI personality (Friendly, Teacher, Professional, Funny)
-- **Local Storage**: All data saved locally, survives page refresh
-- **Responsive Design**: Mobile-first, works on all devices
-- **Accessibility**: ARIA labels, keyboard navigation, reduced motion support
-- **Animations**: Smooth transitions, typing indicators, typewriter effects
+## Live Features
 
-## 🛠️ Tech Stack
+- **AI chat**: Groq Cloud (OpenAI-compatible) as the primary provider, with optional Google Gemini fallback and a built-in demo response when no provider is available.
+- **Multiple personalities**: Friendly, Teacher, Professional, and Funny.
+- **Chat sessions**: Create, rename, delete, search, and switch between conversations. Everything is saved in `localStorage`.
+- **Markdown responses**: Bold, italic, code blocks with copy buttons, lists, and line breaks.
+- **Rich maps**: The AI can add `[[MAP: place]]` tags. The frontend geocodes with Nominatim, renders an interactive Leaflet/OpenStreetMap card, and offers Google Maps, directions, and copy-coordinates actions.
+- **Rich images**: The AI can add up to three `[[IMAGE: term]]` tags. Images come from Unsplash when configured, otherwise Wikimedia Commons, with lazy loading, credits, download, and a lightbox.
+- **Image upload and vision**: Upload, drag-and-drop, or paste images. Images are compressed in the browser and sent to the Groq vision model or Gemini when supported.
+- **Voice input**: Browser SpeechRecognition, with a MediaRecorder + Groq Whisper fallback when browser recognition is unavailable.
+- **Voice assistant**: Full-screen voice mode with listening/thinking/speaking states, optional "Hey Jarvixss" wake phrase, mute, stop-speaking, and automatic reply playback.
+- **Read-aloud replies**: Browser speech synthesis or cloud voices from Groq Orpheus. Includes speed, pitch, volume, presets, per-personality voices, pause/resume/stop controls, and automatic fallback to browser voices.
+- **Emoji system**: Searchable picker, categories, skin tones, shortcode autocomplete, recent emojis, message reactions, and emoji burst animations.
+- **Themes and settings**: Dark/light mode, accent color, font size, animation toggle, emoji animation toggle, and sound toggle.
+- **Export**: Download the current chat as TXT or JSON, and download generated images.
+- **Responsive and accessible**: Mobile sidebar, ARIA labels, keyboard shortcuts, focus handling, and reduced-motion support.
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES Modules), Leaflet
-- **Backend**: Vercel Serverless Functions (Node.js)
-- **AI**: Groq Cloud API (primary, fast, OpenAI-compatible) with optional Google Gemini fallback
+## Tech Stack
+
+- **Frontend**: HTML5, CSS3, vanilla JavaScript ES modules, Leaflet
+- **Backend**: Vercel Serverless Functions (Node.js) with a local Node dev server
+- **AI**: Groq Cloud chat + vision, optional Google Gemini fallback
+- **Speech**: Groq Whisper (transcription), Groq Orpheus (cloud TTS), Web Speech API (browser STT/TTS)
 - **Maps**: Leaflet + OpenStreetMap, Nominatim geocoding
-- **Images**: Wikimedia Commons/Wikipedia API, Unsplash API (optional)
-- **Storage**: localStorage
-- **APIs**: Web Speech API, Canvas API, Geolocation API
+- **Images**: Wikimedia Commons/Wikipedia, optional Unsplash
+- **Storage**: Browser `localStorage`
+- **Deployment**: Vercel
 
-## 🚀 Getting Started
+## Project Structure
+
+```text
+.
+├── api/
+│   ├── chat.js          # Groq -> Gemini -> demo chat provider chain
+│   ├── image.js         # Unsplash -> Wikimedia image search
+│   ├── tts.js           # Groq Orpheus text-to-speech
+│   └── transcribe.js    # Groq Whisper speech-to-text
+├── assets/
+│   └── logo.svg
+├── css/
+│   ├── style.css        # Main theme and layout
+│   ├── animations.css   # Ripple, skeleton, slide, fade animations
+│   ├── emoji.css        # Emoji picker, reactions, bursts
+│   └── voice.css        # Voice overlay, TTS controls, voice menu
+├── js/
+│   ├── app.js           # App state, chat flow, maps/images, settings
+│   ├── storage.js       # localStorage helpers and image compression
+│   ├── ui.js            # Rendering, markdown, modals, toasts, exports
+│   ├── emoji.js         # Picker, shortcodes, reactions
+│   └── voice.js         # Voice assistant, STT fallback, TTS engines
+├── index.html
+├── server.js            # Local static file + API dev server
+├── vercel.json          # Vercel function and cache configuration
+├── package.json
+├── .env.example
+├── LICENSE
+└── README.md
+```
+
+## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [Groq Cloud API Key](https://console.groq.com/keys) (recommended) (optional - demo mode available)
+- [Node.js](https://nodejs.org/) v18 or newer
+- A [Groq API key](https://console.groq.com/keys) (recommended; the app still runs in demo mode without one)
 
 ### Local Setup
 
-1. **Clone the repository**
+1. Clone the repository:
+
 ```bash
-git clone https://github.com/yourusername/novachat.git
-cd novachat
+git clone https://github.com/yalamareddysharathreddy5-coder/AI_ChatBot.git
+cd AI_ChatBot
 ```
 
-2. **Create environment file**
+2. Create your environment file:
+
 ```bash
 cp .env.example .env.local
 ```
 
-3. **Add your API key to `.env.local`** (recommended)
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+3. Add your keys to `.env.local`:
+
 ```env
 GROQ_API_KEY=your_groq_api_key_here
-# Current models - see https://console.groq.com/docs/models
-GROQ_MODEL=llama-3.1-8b-instant
-GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
-```
-*If no key is set, the app runs in demo mode. `AI_API_KEY` can also be set as an optional Gemini fallback. `UNSPLASH_ACCESS_KEY` is optional for image search.*
+GROQ_MODEL=openai/gpt-oss-20b
+GROQ_VISION_MODEL=qwen/qwen3.8-27b
+GROQ_WHISPER_MODEL=whisper-large-v3
 
-4. **Start the local development server**
+# Optional Gemini fallback
+AI_API_KEY=your_gemini_key_here
+GEMINI_MODEL=gemini-3.5-flash-lite
+
+# Optional Unsplash image search
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
+```
+
+4. Start the local server:
+
 ```bash
 npm run dev
 ```
 
-The project has no npm dependencies, so `npm install` is not required. The dev server serves the static frontend and the `/api/chat` endpoint.
+There are no npm dependencies, so `npm install` is not required.
 
-5. **Open in browser**
-Navigate to `http://localhost:3000`
+5. Open `http://localhost:3000`.
 
-To use Vercel's local emulator instead, run `npm run dev:vercel` (requires the Vercel CLI).
-
-## 🔑 Getting a Groq API Key
-
-1. Go to [Groq Console](https://console.groq.com/keys)
-2. Sign in or create an account
-3. Click "Create API Key"
-4. Copy the key and add it to `.env.local` as `GROQ_API_KEY`
-
-### Optional Gemini Fallback
-
-If you also want a backup provider, add a Google Gemini key from [Google AI Studio](https://makersuite.google.com/app/apikey) as `AI_API_KEY`. Groq is always tried first when configured.
-
-### Optional Unsplash Images
-
-For better image results, add an Unsplash Access Key from [Unsplash Developers](https://unsplash.com/developers) as `UNSPLASH_ACCESS_KEY`. If not set, the app falls back to Wikimedia Commons.
-
-## 📤 Push to GitHub
+The local server serves both the static frontend and every `/api/*` endpoint. To use Vercel's local emulator instead, run:
 
 ```bash
-# Initialize git repository
-git init
-
-# Add all files
-git add .
-
-# Commit changes
-git commit -m "Initial commit: NovaChat AI chatbot"
-
-# Add remote repository (replace with your repo URL)
-git remote add origin https://github.com/yourusername/novachat.git
-
-# Push to GitHub
-git branch -M main
-git push -u origin main
+npm run dev:vercel
 ```
 
-## 🌐 Deploy on Vercel
+## Environment Variables
 
-### Option 1: Using Vercel CLI
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `GROQ_API_KEY` | Recommended | Chat, vision, Whisper transcription, and cloud TTS |
+| `GROQ_MODEL` | No | Text chat model; defaults to `openai/gpt-oss-20b` |
+| `GROQ_VISION_MODEL` | No | Model used when an image is attached; defaults to `qwen/qwen3.8-27b` |
+| `GROQ_WHISPER_MODEL` | No | Speech-to-text model; defaults to `whisper-large-v3` |
+| `AI_API_KEY` | No | Google Gemini fallback for chat |
+| `GEMINI_MODEL` | No | Preferred Gemini fallback model |
+| `UNSPLASH_ACCESS_KEY` | No | Better image search results; falls back to Wikimedia |
+
+Groq model names change over time. Check [Groq's current models](https://console.groq.com/docs/models) and update the variables if a model is retired.
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/api/chat` | Accepts `{ messages, personality, image }` and returns `{ message, model, provider }` |
+| `GET` | `/api/image?q=term` | Returns `{ results }` with up to three images and credits |
+| `POST` | `/api/tts` | Accepts `{ text, voice }` (up to 200 characters) and returns WAV audio |
+| `POST` | `/api/transcribe` | Accepts raw audio and returns `{ text }` |
+
+The TTS and transcription endpoints are rate-limited to 10 requests per minute per IP. Audio uploads are limited to 10 MB.
+
+## Deploy to Vercel
+
+### Option 1: Vercel Dashboard
+
+1. Go to [vercel.com](https://vercel.com) and sign in.
+2. Choose **Add New → Project**.
+3. Import:
+   `https://github.com/yalamareddysharathreddy5-coder/AI_ChatBot.git`
+4. Configure the project:
+   - **Framework Preset**: Other
+   - **Root Directory**: `./`
+   - **Build Command**: leave empty
+   - **Output Directory**: leave empty
+   - **Install Command**: leave empty
+5. Add the environment variables from the table above under **Environment Variables**.
+6. Click **Deploy**.
+
+Because the frontend is static and the API lives in `/api`, Vercel detects the functions automatically. The included `vercel.json` only configures the function duration and disables API caching. Do not add an old `builds` array; the legacy `builds` configuration can conflict with the current `functions` setting.
+
+### Option 2: Vercel CLI
 
 ```bash
-# Login to Vercel
+npm i -g vercel
 vercel login
-
-# Deploy
 vercel
-
-# Follow the prompts
-# For production deployment:
 vercel --prod
 ```
 
-### Option 2: Using Vercel Dashboard
+Add the environment variables in the Vercel dashboard or with `vercel env add`.
 
-1. Go to [vercel.com](https://vercel.com) and sign in
-2. Click "New Project"
-3. Import your GitHub repository
-4. Vercel will auto-detect the configuration
-5. Add environment variables (recommended):
-   - Key: `GROQ_API_KEY` - Your Groq API key (https://console.groq.com/keys)
-   - Key: `GROQ_MODEL` (optional) - defaults to a current model
-   - Key: `GROQ_VISION_MODEL` (optional) - for image uploads
-   - Key: `AI_API_KEY` (optional) - Google Gemini fallback
-   - Key: `UNSPLASH_ACCESS_KEY` (optional) - for better image search results
-6. Click "Deploy"
+### Important Deployment Notes
 
-## ⌨️ Keyboard Shortcuts
+- Add `GROQ_API_KEY` in Vercel. Without it, chat falls back to demo mode and TTS/transcription return configuration errors.
+- The `.env.local` file is intentionally gitignored. Never commit real API keys.
+- If an older Vercel project still serves the old NovaChat build, verify that it is connected to `main` in this repository, then redeploy the latest commit. You can also remove and re-import the project.
+- Voice input requires `localhost` or HTTPS. Vercel deployments are HTTPS, so this works in production.
+- If a Groq model returns "model not found", update `GROQ_MODEL`, `GROQ_VISION_MODEL`, or `GROQ_WHISPER_MODEL` in Vercel and redeploy.
 
-- `Enter` - Send message
-- `Shift + Enter` - New line in message
-- `Ctrl + K` - New chat
-- `Esc` - Close modals
+## Keyboard Shortcuts
 
-## 🎨 Features Guide
+- `Enter` sends a message.
+- `Shift + Enter` inserts a new line.
+- `Ctrl + K` creates a new chat.
+- `Escape` closes modals, the emoji picker, the voice menu, or voice mode.
+- `Tab` or arrow keys navigate emoji shortcode suggestions.
 
-### Image Upload
-- Click the image icon to upload
-- Drag and drop images onto the chat area
-- Paste images from clipboard (Ctrl+V/Cmd+V)
+## Local Data
 
-### Chat Management
-- Create new chats with "New Chat" button
-- Rename or delete chats from the sidebar
-- Search through chat history
-- All chats saved automatically
+All conversations, settings, drafts, recent emojis, and reactions are stored in the browser:
 
-### Settings
-- Change AI personality
-- Adjust font size
-- Toggle animations
-- Export or clear all data
+- `jarvixss_sessions`
+- `jarvixss_current_session`
+- `jarvixss_theme`
+- `jarvixss_settings`
+- `jarvixss_draft`
+- `jarvixss_emoji_recent`
+- `jarvixss_emoji_reactions`
+- `jarvixss_emoji_skin`
 
-## 🐛 Troubleshooting
+Older `novachat_*` keys are migrated automatically on first load. Clearing site data or using **Settings → Clear All Data** removes everything.
 
-### API Key Issues
-- **Demo mode**: If no API key is set, the app uses demo responses
-- **Rate limiting**: Free tiers have rate limits; wait a moment and try again (429 errors show friendly messages)
-- **Invalid key**: Check your Groq key in `.env.local` (local) or Vercel environment variables (deployed). 401 errors show clear guidance.
-- **Groq unavailable**: The app automatically tries the optional Gemini fallback, then demo mode
-- **Model not found**: If a model is deprecated, update `GROQ_MODEL`/`GROQ_VISION_MODEL` in env. See current models at [Groq Models](https://console.groq.com/docs/models)
+## Troubleshooting
 
-### Local Development Issues
-- **Port already in use**: Set the `PORT` environment variable before running `npm run dev` (e.g. `PORT=3001` on macOS/Linux, `$env:PORT=3001` in PowerShell)
-- **Module errors**: Ensure all files use ES module syntax
-- **CORS errors**: The API function handles CORS headers
+### The page shows the old NovaChat version
 
-### Image Upload Issues
-- **File too large**: Images are limited to 5MB
-- **Compression**: Large images are auto-compressed to ~300KB
+The local branch must be pushed before Vercel can build it. Check:
 
-## 👤 Creator
+```bash
+git status
+git log --oneline -10
+git push origin main
+```
 
-**Jarvixss Chat** was created and developed by **Sharath** (21 years old, final year B.Tech CSE-AIML student). Built as a personal project using HTML, CSS, and JavaScript, deployed on Vercel. The app is powered by a large language model served through the Groq API, with design and features built by Sharath.
+Then open the Vercel project and trigger **Redeploy** for the latest commit.
 
-## 📸 Screenshots
+### Chat works but voice does not
 
-*Screenshots placeholder - Add your own screenshots here.*
+- Allow microphone permission in the browser.
+- Use Chrome or Edge for the best SpeechRecognition support.
+- Voice input only works on `localhost` or HTTPS.
+- Without `GROQ_API_KEY`, the MediaRecorder fallback cannot transcribe audio.
 
-## 📝 Credits
+### Cloud voice is unavailable
 
-- [OpenStreetMap](https://www.openstreetmap.org/) - Map tiles and data
-- [Leaflet](https://leafletjs.com/) - Interactive maps
-- [Nominatim](https://nominatim.org/) - Geocoding
-- [Wikimedia Commons](https://commons.wikimedia.org/) - Image search
-- [Unsplash](https://unsplash.com/) - Optional image source
-- [Groq](https://console.groq.com/) - AI inference
+- Confirm `GROQ_API_KEY` is set in Vercel.
+- Accept the Groq Orpheus model terms in the Groq console.
+- Switch the voice engine to **Browser voices** in Settings.
+- The app automatically falls back to browser speech synthesis if cloud TTS fails.
 
-## 📝 License
+### Images do not appear
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Some topics may not return Wikimedia results.
+- Adding `UNSPLASH_ACCESS_KEY` improves results.
+- Image URLs are restricted to HTTP/HTTPS; blocked or malformed URLs are filtered out.
 
-## 🤝 Contributing
+### Maps do not load
 
-This is a beginner-friendly project. Feel free to fork, modify, and improve it!
+- Nominatim may rate-limit repeated lookups. Results are cached in `localStorage`.
+- Check the browser console for geocoding or Leaflet errors.
 
-## 💡 Tips for Beginners
+### Vercel deployment fails
 
-- Start by exploring the code - it's well-commented
-- Try the demo mode first to understand the UI
-- Add your API key to unlock full AI capabilities
-- Experiment with different settings and features
+- Confirm the repository root contains `package.json`, `index.html`, and `api/`.
+- Remove any dashboard build command or output directory overrides.
+- Make sure `vercel.json` does not combine `builds` and `functions`.
+- Check the Vercel build logs for the exact failing step.
 
----
+## Credits
 
-Made with ❤️ for learning and building amazing things!
+- [Groq](https://console.groq.com/) for chat, vision, Whisper, and Orpheus TTS
+- [Google Gemini](https://ai.google.dev/) as an optional chat fallback
+- [OpenStreetMap](https://www.openstreetmap.org/) for map tiles and data
+- [Leaflet](https://leafletjs.com/) for interactive maps
+- [Nominatim](https://nominatim.org/) for geocoding
+- [Wikimedia Commons](https://commons.wikimedia.org/) for image search
+- [Unsplash](https://unsplash.com/) for optional image search
+
+## Creator
+
+**Jarvixss Chat** was created and developed by **Sharath**, a final-year B.Tech Computer Science and Engineering (AI & ML) student. The app, its design, and its features were built with HTML, CSS, and JavaScript, and it is deployed on Vercel.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

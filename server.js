@@ -118,7 +118,7 @@ function readBody(req, limit = 15 * 1024 * 1024) {
       chunks.push(chunk);
     });
 
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
 }
@@ -142,7 +142,17 @@ async function handleApi(req, res, pathname) {
   }
 
   const body = await readBody(req);
-  req.body = body ? JSON.parse(body) : {};
+  const contentType = String(req.headers['content-type'] || '');
+  const isJsonType = /application\/(?:[a-z0-9.+-]+\+)?json/i.test(contentType);
+  const isBinaryType = /^(?:audio|video|image|multipart)\//i.test(contentType);
+  const looksLikeJson = !isBinaryType && body.length > 0 && /^\s*[\[{]/.test(body.subarray(0, 32).toString('utf8'));
+  if (!body.length) {
+    req.body = {};
+  } else if (isJsonType || looksLikeJson) {
+    req.body = JSON.parse(body.toString('utf8'));
+  } else {
+    req.body = body;
+  }
 
   const { default: handler } = await import(`${pathToFileURL(handlerPath).href}?t=${Date.now()}`);
   await handler(req, createResponseShim(res));

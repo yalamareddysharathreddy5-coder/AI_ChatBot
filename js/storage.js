@@ -162,7 +162,19 @@ function getDefaultSettings() {
     fontSize: 16,
     accentColor: '#6366f1',
     animations: true,
-    sounds: false
+    animationIntensity: 'normal',
+    emojiAnimations: true,
+    sounds: false,
+    voiceEngine: 'browser',
+    voiceValue: '',
+    voiceSpeed: 1,
+    voicePitch: 1,
+    voiceVolume: 1,
+    autoRead: false,
+    wakePhrase: false,
+    voiceLanguage: 'auto',
+    personalityVoices: {},
+    voicePresets: {}
   };
 }
 

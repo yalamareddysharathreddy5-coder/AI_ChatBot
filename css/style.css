@@ -1,4 +1,4 @@
-/* NovaChat - CSS Variables and Base Styles */
+/* Jarvixss Chat - CSS Variables and Base Styles */
 /* Glassmorphism + Neon Gradient Theme */
 
 :root {
@@ -183,6 +183,48 @@ body {
   50% {
     filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.7));
   }
+}
+
+.logo-img-wrap,
+.welcome-logo-wrap,
+.about-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.45);
+}
+
+.welcome-logo-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.45);
+  animation: float-gentle 3s ease-in-out infinite;
+}
+
+.about-logo-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+
+.bot-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .new-chat-btn {
@@ -1005,6 +1047,68 @@ body {
   .header-actions {
     flex-wrap: wrap;
   }
+}
+
+/* Animation Settings */
+html[data-animation-intensity="subtle"] .orb { animation-duration: 30s; }
+html[data-animation-intensity="strong"] .orb { animation-duration: 14s; }
+
+html[data-animation-intensity="subtle"] .logo,
+html[data-animation-intensity="subtle"] .welcome-logo,
+html[data-animation-intensity="subtle"] .welcome-logo-img,
+html[data-animation-intensity="subtle"] .voice-orb.idle { animation-duration: 4.5s; }
+html[data-animation-intensity="strong"] .logo,
+html[data-animation-intensity="strong"] .welcome-logo,
+html[data-animation-intensity="strong"] .welcome-logo-img,
+html[data-animation-intensity="strong"] .voice-orb.idle { animation-duration: 2s; }
+
+html[data-animation-intensity="subtle"] .message,
+html[data-animation-intensity="subtle"] .typing-indicator,
+html[data-animation-intensity="subtle"] .voice-overlay,
+html[data-animation-intensity="subtle"] .slide-in-left,
+html[data-animation-intensity="subtle"] .slide-in-right,
+html[data-animation-intensity="subtle"] .fade-in,
+html[data-animation-intensity="subtle"] .emoji-picker.active { animation-duration: 0.45s; }
+html[data-animation-intensity="strong"] .message,
+html[data-animation-intensity="strong"] .typing-indicator,
+html[data-animation-intensity="strong"] .voice-overlay,
+html[data-animation-intensity="strong"] .slide-in-left,
+html[data-animation-intensity="strong"] .slide-in-right,
+html[data-animation-intensity="strong"] .fade-in,
+html[data-animation-intensity="strong"] .emoji-picker.active { animation-duration: 0.2s; }
+
+html[data-animation-intensity="subtle"] .suggest-prompt-card { animation-duration: 0.75s; }
+html[data-animation-intensity="strong"] .suggest-prompt-card { animation-duration: 0.35s; }
+
+html[data-animation-intensity="subtle"] .typing-dot { animation-duration: 2.1s; }
+html[data-animation-intensity="strong"] .typing-dot { animation-duration: 1s; }
+
+html[data-animation-intensity="subtle"] .skeleton { animation-duration: 2.25s; }
+html[data-animation-intensity="strong"] .skeleton { animation-duration: 1s; }
+
+html[data-animation-intensity="subtle"] .voice-assistant-btn.active .voice-ring,
+html[data-animation-intensity="subtle"] .voice-orb.listening { animation-duration: 2.25s; }
+html[data-animation-intensity="strong"] .voice-assistant-btn.active .voice-ring,
+html[data-animation-intensity="strong"] .voice-orb.listening { animation-duration: 1s; }
+
+html[data-animation-intensity="subtle"] .voice-orb.thinking { animation-duration: 3s; }
+html[data-animation-intensity="strong"] .voice-orb.thinking { animation-duration: 1.4s; }
+
+html[data-animation-intensity="subtle"] .voice-orb.speaking { animation-duration: 1.5s; }
+html[data-animation-intensity="strong"] .voice-orb.speaking { animation-duration: 0.7s; }
+
+html[data-animation-intensity="subtle"] .voice-wave { animation-duration: 1.2s; }
+html[data-animation-intensity="strong"] .voice-wave { animation-duration: 0.55s; }
+
+html[data-animation-intensity="subtle"] .emoji-burst { animation-duration: 3s; }
+html[data-animation-intensity="strong"] .emoji-burst { animation-duration: 1.4s; }
+
+html[data-animations="off"] *,
+html[data-animations="off"] *::before,
+html[data-animations="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }
 
 /* Reduced Motion */

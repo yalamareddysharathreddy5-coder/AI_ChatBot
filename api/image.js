@@ -39,7 +39,7 @@ async function searchWikimedia(q, limit = 3) {
 
   const response = await fetch(`${WIKIMEDIA_SEARCH_URL}?${params.toString()}`, {
     headers: {
-      'User-Agent': 'NovaChat/1.0 (Educational Project)',
+      'User-Agent': 'JarvixssChat/1.0 (Educational Project)',
       'Referer': 'http://localhost:3000'
     },
     signal: AbortSignal.timeout(10000)

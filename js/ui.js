@@ -253,7 +253,7 @@ export function createMessageElement(message, isUser = false) {
   if (isUser) {
     avatar.textContent = '👤';
   } else {
-    avatar.innerHTML = `<img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="bot-avatar-img" onerror="this.style.display='none'; this.parentElement.textContent='🤖'">`;
+    avatar.innerHTML = `<img src="assets/logo.svg" alt="Jarvixss Chat logo" class="bot-avatar-img" onerror="this.style.display='none'; this.parentElement.textContent='🤖'">`;
   }
   
   const contentDiv = document.createElement('div');
@@ -344,7 +344,7 @@ export function createMessageElement(message, isUser = false) {
       const dlBtn = document.createElement('button');
       dlBtn.className = 'message-action-btn';
       dlBtn.textContent = '⬇️ Download Image';
-      dlBtn.onclick = () => downloadImage(message.image, 'nova-image.png');
+      dlBtn.onclick = () => downloadImage(message.image, 'jarvixss-image.png');
       actions.appendChild(dlBtn);
     }
 
@@ -404,7 +404,7 @@ export function createTypingIndicator() {
   
   const avatar = document.createElement('div');
   avatar.className = 'message-avatar';
-  avatar.innerHTML = `<img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="bot-avatar-img" onerror="this.style.display='none'; this.parentElement.textContent='🤖'">`;
+  avatar.innerHTML = `<img src="assets/logo.svg" alt="Jarvixss Chat logo" class="bot-avatar-img" onerror="this.style.display='none'; this.parentElement.textContent='🤖'">`;
   
   const bubble = document.createElement('div');
   bubble.className = 'typing-bubble';

@@ -1,7 +1,7 @@
 {
   "name": "jarvixss-chat",
   "version": "1.0.0",
-  "description": "A complete, beginner-friendly AI chatbot web app called Jarvixss Chat using plain HTML, CSS and vanilla JavaScript",
+  "description": "Jarvixss Chat - an AI chatbot with Groq-powered chat, voice assistant, speech-to-text, cloud/browser text-to-speech, maps, image search, emoji reactions, and local chat history.",
   "type": "module",
   "scripts": {
     "dev": "node server.js",
@@ -11,7 +11,20 @@
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["chatbot", "ai", "novachat", "gemini"],
-  "author": "",
+  "keywords": [
+    "chatbot",
+    "ai",
+    "jarvixss",
+    "groq",
+    "gemini",
+    "speech-to-text",
+    "text-to-speech",
+    "vercel"
+  ],
+  "author": "Sharath",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yalamareddysharathreddy5-coder/AI_ChatBot.git"
+  },
   "license": "MIT"
 }

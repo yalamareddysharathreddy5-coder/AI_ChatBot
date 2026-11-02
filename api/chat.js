@@ -4,9 +4,8 @@
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 // Current Groq models (update as needed from https://console.groq.com/docs/models)
-const GROQ_TEXT_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
-const GROQ_VISION_MODEL =
-  process.env.GROQ_VISION_MODEL || 'llama-3.2-11b-vision-preview';
+const GROQ_TEXT_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.8-27b';
 
 const GEMINI_MODELS = [
   ...new Set(
@@ -112,19 +111,28 @@ async function callGroq({ apiKey, messages, image, personality }) {
     ...buildGroqMessages(messages, image)
   ];
 
+  const requestBody = {
+    model,
+    messages: requestMessages,
+    temperature: 0.7,
+    max_completion_tokens: 2048,
+    stream: false
+  };
+
+  if (model.startsWith('openai/gpt-oss')) {
+    requestBody.reasoning_effort = 'low';
+    requestBody.include_reasoning = false;
+  } else if (model.startsWith('qwen/qwen3')) {
+    requestBody.reasoning_effort = 'none';
+  }
+
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`
     },
-    body: JSON.stringify({
-      model,
-      messages: requestMessages,
-      temperature: 0.7,
-      max_tokens: 1024,
-      stream: false
-    }),
+    body: JSON.stringify(requestBody),
     signal: AbortSignal.timeout(30000)
   });
 

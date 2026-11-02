@@ -4,7 +4,7 @@
 import * as storage from './storage.js';
 import * as ui from './ui.js';
 import { initEmojiPicker, replaceShortcodes, triggerEmojiBurst, countEmojis } from './emoji.js';
-import { initVoiceAssistant, speakMessage } from './voice.js';
+import { initVoiceAssistant, speakMessage, collectVoiceSettings } from './voice.js';
 
 // Application state
 let currentSessionId = null;
@@ -54,7 +54,11 @@ function init() {
   initVoiceAssistant({
     getSettings: () => currentSettings,
     sendMessage: sendVoiceMessage,
-    getMessageText
+    getMessageText,
+    updateSettings: patch => {
+      currentSettings = { ...currentSettings, ...patch };
+      storage.saveSettings(currentSettings);
+    }
   });
 }
 
@@ -79,10 +83,38 @@ async function sendVoiceMessage(text) {
 // Apply settings
 function applySettings() {
   document.documentElement.style.fontSize = currentSettings.fontSize + 'px';
+  document.documentElement.setAttribute('data-animation-intensity', currentSettings.animationIntensity || 'normal');
+  document.documentElement.setAttribute('data-animations', currentSettings.animations === false ? 'off' : 'on');
+  if (currentSettings.accentColor) {
+    document.documentElement.style.setProperty('--accent-primary', currentSettings.accentColor);
+  }
   
   if (!currentSettings.animations) {
     document.documentElement.style.setProperty('--animation-duration', '0s');
+  } else {
+    document.documentElement.style.removeProperty('--animation-duration');
   }
+}
+
+function hydrateSettingsForm() {
+  const personality = document.getElementById('personalitySelect');
+  const fontSize = document.getElementById('fontSizeRange');
+  const accent = document.getElementById('accentColorSelect');
+  const animations = document.getElementById('animationsToggle');
+  const animationIntensity = document.getElementById('animationIntensity');
+  const emojiAnimations = document.getElementById('emojiAnimationsToggle');
+  const sounds = document.getElementById('soundsToggle');
+  if (personality) personality.value = currentSettings.personality || 'friendly';
+  if (fontSize) {
+    fontSize.value = String(currentSettings.fontSize || 16);
+    const label = document.getElementById('fontSizeValue');
+    if (label) label.textContent = fontSize.value;
+  }
+  if (accent) accent.value = currentSettings.accentColor || '#6366f1';
+  if (animations) animations.checked = currentSettings.animations !== false;
+  if (animationIntensity) animationIntensity.value = currentSettings.animationIntensity || 'normal';
+  if (emojiAnimations) emojiAnimations.checked = currentSettings.emojiAnimations !== false;
+  if (sounds) sounds.checked = !!currentSettings.sounds;
 }
 
 // Setup all event listeners
@@ -156,7 +188,10 @@ function setupEventListeners() {
   }
   
   // Settings
-  document.getElementById('settingsBtn').addEventListener('click', () => ui.openModal('settingsModal'));
+  document.getElementById('settingsBtn').addEventListener('click', () => {
+    hydrateSettingsForm();
+    ui.openModal('settingsModal');
+  });
   
   // Settings modal
   document.getElementById('closeSettingsBtn').addEventListener('click', () => ui.closeModal('settingsModal'));
@@ -497,11 +532,11 @@ async function generateResponse({ autoRead = true } = {}) {
     if (autoRead && currentSettings.autoRead) speakMessage(botMessage.id);
     return botMessage.content;
     
-    } catch (error) {
+  } catch (error) {
     // Remove typing indicator
     const typingEl = document.getElementById('typingIndicator');
     if (typingEl) typingEl.remove();
-    
+
     if (error.name === 'AbortError') {
       ui.showToast('Generation stopped', 'info');
     } else {
@@ -509,30 +544,32 @@ async function generateResponse({ autoRead = true } = {}) {
       const botMessage = {
         id: 'msg_' + Date.now(),
         role: 'assistant',
-        content: '⚠️ Sorry, I\'m having trouble connecting. Let me try in demo mode...\n\nHello! I\'m Nova, your AI assistant. I can help you with general knowledge, coding, homework, travel planning, and much more. What would you like to discuss today?',
+        content: '⚠️ Sorry, I\'m having trouble connecting. Let me try in demo mode...\n\nHello! I\'m Jarvixss Chat, your AI assistant. I can help you with general knowledge, coding, homework, travel planning, and much more. What would you like to discuss today?',
         timestamp: ui.formatTimestamp(),
         image: null
       };
-      
+
       sessions[currentSessionId].messages.push(botMessage);
       sessions[currentSessionId].updatedAt = Date.now();
       storage.saveSessions(sessions);
-      
+
       const botMsgEl = ui.createMessageElement(botMessage, false);
       messagesContainer.appendChild(botMsgEl);
       renderRichContent(botMsgEl, botMessage.content);
       ui.scrollToBottom(messagesContainer);
-      
+
       ui.showToast('Using demo mode', 'warning');
       if (autoRead && currentSettings.autoRead) speakMessage(botMessage.id);
       return botMessage.content;
     }
+  } finally {
+    isGenerating = false;
+    currentAbortController = null;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('stopBtn').style.display = 'none';
     document.getElementById('regenerateBtn').style.display = 'inline-block';
   }
-  
-  isGenerating = false;
-  document.getElementById('sendBtn').disabled = false;
-  document.getElementById('stopBtn').style.display = 'none';
+
   return null;
 }
 
@@ -820,7 +857,7 @@ async function renderMapCard(bubble, query) {
       await new Promise(r => setTimeout(r, 1000));
       const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
         headers: {
-          'User-Agent': 'NovaChat/1.0'
+          'User-Agent': 'JarvixssChat/1.0'
         }
       });
       const data = await resp.json();
@@ -952,7 +989,7 @@ async function renderImageGallery(bubble, queries) {
             const a = document.createElement('a');
             a.href = url;
             const ext = blob.type.split('/')[1] || 'jpg';
-            a.download = `nova-image-${Date.now()}.${ext}`;
+            a.download = `jarvixss-image-${Date.now()}.${ext}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1001,11 +1038,15 @@ function openLightbox(url, credit) {
 // Save settings
 function saveSettings() {
   currentSettings = {
+    ...currentSettings,
     personality: document.getElementById('personalitySelect').value,
     fontSize: parseInt(document.getElementById('fontSizeRange').value),
     accentColor: document.getElementById('accentColorSelect').value,
     animations: document.getElementById('animationsToggle').checked,
-    sounds: document.getElementById('soundsToggle').checked
+    animationIntensity: document.getElementById('animationIntensity').value,
+    emojiAnimations: document.getElementById('emojiAnimationsToggle').checked,
+    sounds: document.getElementById('soundsToggle').checked,
+    ...collectVoiceSettings()
   };
   
   storage.saveSettings(currentSettings);

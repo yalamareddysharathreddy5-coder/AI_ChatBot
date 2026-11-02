@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Jarvixss Chat is an AI chatbot with voice input, read-aloud replies, maps, image search, emoji reactions, and local chat history. Built by Sharath.">
+    <meta name="theme-color" content="#6366f1">
     <title>Jarvixss Chat - AI Chatbot</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/emoji.css">
@@ -23,7 +26,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <span class="logo-img-wrap"><img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="sidebar-logo-img" onerror="this.style.display='none'; this.parentElement.querySelector('.logo-emoji').style.display='inline'"></span>
+                    <span class="logo-img-wrap"><img src="assets/logo.svg" alt="Jarvixss Chat logo" class="sidebar-logo-img" onerror="this.style.display='none'; this.parentElement.querySelector('.logo-emoji').style.display='inline'"></span>
                     <span class="logo-emoji" style="display:none">✨</span>
                     <span>Jarvixss Chat</span>
                 </div>
@@ -65,7 +68,7 @@
                 <!-- Welcome Screen -->
                 <div class="welcome-screen" id="welcomeScreen">
                 <div class="welcome-logo-wrap">
-                    <img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="welcome-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <img src="assets/logo.svg" alt="Jarvixss Chat logo" class="welcome-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="welcome-logo" style="display:none">✨</div>
                 </div>
                 <h1 class="welcome-title">Welcome to Jarvixss Chat</h1>
@@ -135,7 +138,7 @@
                 <div class="settings-group settings-about">
                     <div style="display:flex;align-items:center;gap:0.75rem;">
                         <div class="about-logo-wrap">
-                            <img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="about-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                            <img src="assets/logo.svg" alt="Jarvixss Chat logo" class="about-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
                             <span style="display:none">✨</span>
                         </div>
                         <div>
@@ -235,6 +238,9 @@
                     <div style="margin-bottom:0.5rem;">
                         <label for="voiceSelect">Voice</label>
                         <select id="voiceSelect"></select>
+                        <div class="voice-count" id="voiceCount">Loading voices...</div>
+                        <div class="voice-tip" id="voiceTip"></div>
+                        <button class="modal-btn" id="voiceLoadBtn" style="margin-top:0.4rem;">Refresh voice list</button>
                     </div>
                     <div style="margin-bottom:0.5rem;">
                         <label for="voiceSpeed">Speed: <span id="voiceSpeedValue">1</span>x</label>
@@ -325,7 +331,7 @@
     <div id="voiceOverlay" class="voice-overlay" role="dialog" aria-modal="true" aria-label="Voice assistant">
         <div class="voice-orb-container">
             <div class="voice-orb idle" id="voiceOrb" tabindex="0" role="button" aria-label="Interrupt and listen">
-                <img src="assets/logo.jpg" alt="Jarvixss Chat logo" class="voice-orb-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <img src="assets/logo.svg" alt="Jarvixss Chat logo" class="voice-orb-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                 <div class="voice-orb-fallback" style="display:none">🎙️</div>
                 <div class="voice-waveform" id="voiceWaveform" style="display:none;">
                     <div class="voice-wave"></div>
@@ -347,6 +353,12 @@
         <div class="voice-aria-live" aria-live="assertive" id="voiceAriaLive"></div>
     </div>
     <div class="voice-mic-indicator" id="voiceMicIndicator"><span>🔴</span> Mic is on</div>
+
+    <div class="tts-controls" id="ttsControls" hidden>
+        <span class="tts-now-playing" id="ttsNowPlaying">Reading aloud...</span>
+        <button class="tts-control-btn" id="ttsPauseBtn" aria-label="Pause reading">Pause</button>
+        <button class="tts-control-btn" id="ttsStopBtn" aria-label="Stop reading">Stop</button>
+    </div>
 
     <footer class="app-footer">Built with ❤️ by Sharath</footer>
 

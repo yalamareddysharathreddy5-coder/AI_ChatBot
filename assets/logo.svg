@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Jarvixss Chat logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="0.5" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="bubble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e9e5ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <circle cx="405" cy="107" r="18" fill="#ffffff" opacity="0.55"/>
+  <circle cx="440" cy="150" r="9" fill="#ffffff" opacity="0.35"/>
+  <circle cx="96" cy="395" r="10" fill="#ffffff" opacity="0.3"/>
+  <path d="M128 112h256c35.3 0 64 28.7 64 64v144c0 35.3-28.7 64-64 64H264l-96 76 18-76h-58c-35.3 0-64-28.7-64-64V176c0-35.3 28.7-64 64-64z" fill="url(#bubble)"/>
+  <path d="M286 184v132c0 48-30 78-78 78-41 0-70-23-79-61l45-15c5 22 16 33 35 33 22 0 33-13 33-38V184z" fill="#6d28d9"/>
+  <circle cx="352" cy="206" r="12" fill="#ec4899"/>
+  <circle cx="390" cy="206" r="12" fill="#a855f7"/>
+  <circle cx="352" cy="244" r="12" fill="#a855f7"/>
+  <circle cx="390" cy="244" r="12" fill="#6366f1"/>
+</svg>

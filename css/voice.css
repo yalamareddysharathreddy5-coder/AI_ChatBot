@@ -289,3 +289,119 @@
     transform: none;
   }
 }
+
+.voice-count {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.voice-tip {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(255, 193, 7, 0.9);
+}
+
+.voice-menu {
+  position: fixed;
+  z-index: 13000;
+  min-width: 230px;
+  max-width: min(320px, calc(100vw - 16px));
+  padding: 0.6rem;
+  background: var(--bg-secondary, #1f2937);
+  color: var(--text-primary, #f8fafc);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  font-size: 0.82rem;
+}
+
+.voice-menu-title {
+  margin-bottom: 0.45rem;
+  font-weight: 600;
+}
+
+.voice-menu select {
+  width: 100%;
+  margin-bottom: 0.45rem;
+  padding: 0.4rem;
+  color: inherit;
+  background: var(--bg-primary, #111827);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+}
+
+.voice-menu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.voice-menu-actions button {
+  flex: 1 1 auto;
+  padding: 0.38rem 0.55rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.voice-menu-actions button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.tts-controls {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 12500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.55rem 0.7rem;
+  color: #f8fafc;
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.tts-controls[hidden] {
+  display: none;
+}
+
+.tts-now-playing {
+  max-width: 260px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tts-control-btn {
+  padding: 0.35rem 0.6rem;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tts-control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 480px) {
+  .tts-controls {
+    right: 0.5rem;
+    left: 0.5rem;
+    bottom: 0.5rem;
+  }
+
+  .tts-now-playing {
+    max-width: 120px;
+  }
+}
