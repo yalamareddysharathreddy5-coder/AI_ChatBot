@@ -169,7 +169,7 @@ The TTS and transcription endpoints are rate-limited to 10 requests per minute p
 5. Add the environment variables from the table above under **Environment Variables**.
 6. Click **Deploy**.
 
-Because the frontend is static and the API lives in `/api`, Vercel detects the functions automatically. The included `vercel.json` only configures the function duration and disables API caching. Do not add an old `builds` array; the legacy `builds` configuration can conflict with the current `functions` setting.
+Because the frontend is static and the API lives in `/api`, Vercel detects the functions automatically. The included `vercel.json` sets `"framework": null` (the **Other** preset) so Vercel serves the root files instead of bundling `server.js` as a single Node entrypoint; it also configures the function duration and disables API caching. Do not add an old `builds` array; the legacy `builds` configuration can conflict with the current `functions` setting.
 
 ### Option 2: Vercel CLI
 
@@ -257,6 +257,7 @@ Then open the Vercel project and trigger **Redeploy** for the latest commit.
 - Confirm the repository root contains `package.json`, `index.html`, and `api/`.
 - Remove any dashboard build command or output directory overrides.
 - Make sure `vercel.json` does not combine `builds` and `functions`.
+- If `/` returns 404 but `/api/chat` works, the project is using the **Node** preset and treating `server.js` as its root entrypoint. Keep `"framework": null` in `vercel.json` or set the dashboard Framework Preset to **Other**.
 - Check the Vercel build logs for the exact failing step.
 
 ## Credits
