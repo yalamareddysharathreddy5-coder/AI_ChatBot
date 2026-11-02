@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Jarvixss Chat is an AI chatbot with voice input, read-aloud replies, maps, image search, emoji reactions, and local chat history. Built by Sharath.">
     <meta name="theme-color" content="#6366f1">
     <title>Jarvixss Chat - AI Chatbot</title>
@@ -23,6 +23,7 @@
 
     <div class="app-container">
         <!-- Sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -49,17 +50,20 @@
         <main class="main-content">
             <!-- Header -->
             <header class="chat-header">
-                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">☰</button>
                 <div class="header-title" id="currentChatName">New Chat</div>
-                <div class="header-actions">
-                <button class="header-btn ripple" id="newChatHeaderBtn" aria-label="New chat">➕ New</button>
-                <button class="header-btn ripple" id="clearChatBtn" aria-label="Clear chat">🗑️ Clear</button>
-                <button class="header-btn ripple" id="regenerateBtn" style="display:none;" aria-label="Regenerate response">🔄 Regenerate</button>
-                <button class="header-btn ripple" id="stopBtn" style="display:none;" aria-label="Stop generating">⏹️ Stop</button>
-                <button class="header-btn ripple voice-assistant-btn" id="voiceAssistantBtn" aria-label="Voice assistant"><span class="voice-ring"></span>🎙️ Voice Assistant</button>
-                <button class="header-btn ripple" id="themeToggleBtn" aria-label="Toggle theme">🌓 Theme</button>
-                <button class="header-btn ripple" id="useLocationBtn" aria-label="Use my location">📍 My Location</button>
-                <button class="header-btn ripple" id="settingsBtn" aria-label="Settings">⚙️ Settings</button>
+                <div class="header-actions-wrap">
+                    <button class="header-menu-toggle" id="headerMenuBtn" aria-label="More actions" aria-controls="headerActions" aria-expanded="false">⋯</button>
+                    <div class="header-actions" id="headerActions">
+                        <button class="header-btn ripple" id="newChatHeaderBtn" aria-label="New chat">➕ New</button>
+                        <button class="header-btn ripple" id="clearChatBtn" aria-label="Clear chat">🗑️ Clear</button>
+                        <button class="header-btn ripple" id="regenerateBtn" style="display:none;" aria-label="Regenerate response">🔄 Regenerate</button>
+                        <button class="header-btn ripple" id="stopBtn" style="display:none;" aria-label="Stop generating">⏹️ Stop</button>
+                        <button class="header-btn ripple voice-assistant-btn" id="voiceAssistantBtn" aria-label="Voice assistant"><span class="voice-ring"></span>🎙️ Voice Assistant</button>
+                        <button class="header-btn ripple" id="themeToggleBtn" aria-label="Toggle theme">🌓 Theme</button>
+                        <button class="header-btn ripple" id="useLocationBtn" aria-label="Use my location">📍 My Location</button>
+                        <button class="header-btn ripple" id="settingsBtn" aria-label="Settings">⚙️ Settings</button>
+                    </div>
                 </div>
             </header>
 
@@ -121,7 +125,7 @@
                         ></textarea>
                     </div>
                     
-                    <button class="send-btn ripple" id="sendBtn" aria-label="Send message">Send ➤</button>
+                    <button class="send-btn ripple" id="sendBtn" aria-label="Send message"><span class="send-label">Send</span><span class="send-icon" aria-hidden="true">➤</span></button>
                 </div>
             </div>
         </main>

@@ -7,6 +7,7 @@
   flex-direction: column;
   width: 360px;
   max-height: min(480px, 70vh);
+  max-height: min(480px, 70dvh);
   padding: 0.75rem;
   background: rgba(22, 22, 48, 0.98);
   border: 1px solid var(--border-glow);
@@ -288,10 +289,11 @@
 @media (max-width: 640px) {
   .emoji-picker {
     right: 8px;
-    bottom: 82px !important;
+    bottom: calc(72px + env(safe-area-inset-bottom)) !important;
     left: 8px !important;
     width: auto !important;
     max-height: 62vh;
+    max-height: 62dvh;
   }
 
   .emoji-grid {

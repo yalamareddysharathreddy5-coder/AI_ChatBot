@@ -146,6 +146,25 @@ function setupEventListeners() {
   
   // Sidebar toggle
   document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
+  // Header actions menu (mobile/tablet)
+  const headerMenuBtn = document.getElementById('headerMenuBtn');
+  const headerActions = document.getElementById('headerActions');
+  headerMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleHeaderMenu();
+  });
+  headerActions.addEventListener('click', (e) => {
+    if (e.target.closest('button')) closeHeaderMenu();
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.header-actions-wrap')) closeHeaderMenu();
+  });
+  window.addEventListener('resize', () => {
+    if (!isMobileSidebar()) closeSidebar();
+    if (window.innerWidth > 1200) closeHeaderMenu();
+  });
   
   // Clear chat
   document.getElementById('clearChatBtn').addEventListener('click', clearCurrentChat);
@@ -225,8 +244,10 @@ function setupEventListeners() {
       e.preventDefault();
       createNewSession();
     }
-    // Esc to close modals
+    // Esc to close overlays and modals
     if (e.key === 'Escape') {
+      closeSidebar();
+      closeHeaderMenu();
       document.querySelectorAll('.modal').forEach(modal => {
         modal.classList.remove('active');
       });
@@ -259,6 +280,7 @@ function createNewSession() {
   
   renderSidebar();
   loadCurrentSession();
+  closeSidebar();
   ui.showToast('New chat created', 'success');
 }
 
@@ -275,6 +297,7 @@ function loadCurrentSession() {
   
   if (session.messages.length === 0) {
     welcomeScreen.style.display = 'flex';
+    messagesContainer.scrollTop = 0;
   } else {
     welcomeScreen.style.display = 'none';
     session.messages.forEach(msg => {
@@ -284,9 +307,9 @@ function loadCurrentSession() {
         renderRichContent(msgEl, msg.content);
       }
     });
+    ui.scrollToBottom(messagesContainer);
   }
   
-  ui.scrollToBottom(messagesContainer);
   document.getElementById('currentChatName').textContent = session.name;
   document.getElementById('regenerateBtn').style.display = 'none';
   document.getElementById('stopBtn').style.display = 'none';
@@ -351,7 +374,7 @@ function switchSession(sessionId) {
   loadCurrentSession();
   
   // Close sidebar on mobile
-  document.getElementById('sidebar').classList.remove('mobile-open');
+  closeSidebar();
 }
 
 // Rename session
@@ -389,9 +412,53 @@ function deleteSession(sessionId) {
   }
 }
 
-// Toggle sidebar
+// Sidebar and header menu responsiveness
+function isMobileSidebar() {
+  return window.matchMedia('(max-width: 900px)').matches;
+}
+
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('mobile-open');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const button = document.getElementById('sidebarToggle');
+  const willOpen = !sidebar.classList.contains('mobile-open');
+
+  sidebar.classList.toggle('mobile-open', willOpen);
+  overlay.classList.toggle('active', willOpen && isMobileSidebar());
+  overlay.setAttribute('aria-hidden', String(!(willOpen && isMobileSidebar())));
+  button.setAttribute('aria-expanded', String(willOpen));
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const button = document.getElementById('sidebarToggle');
+
+  if (!sidebar) return;
+  sidebar.classList.remove('mobile-open');
+  if (overlay) {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+  if (button) button.setAttribute('aria-expanded', 'false');
+}
+
+function toggleHeaderMenu() {
+  const menu = document.getElementById('headerActions');
+  const button = document.getElementById('headerMenuBtn');
+  const willOpen = !menu.classList.contains('open');
+
+  menu.classList.toggle('open', willOpen);
+  button.setAttribute('aria-expanded', String(willOpen));
+}
+
+function closeHeaderMenu() {
+  const menu = document.getElementById('headerActions');
+  const button = document.getElementById('headerMenuBtn');
+
+  if (!menu) return;
+  menu.classList.remove('open');
+  if (button) button.setAttribute('aria-expanded', 'false');
 }
 
 // Handle send message
